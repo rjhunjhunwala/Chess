@@ -100,7 +100,7 @@ public class GameStateNode {
 		int best = Integer.MIN_VALUE;
 		for (GameStateNode n : children) {
 			int a = n.getValue();
-			if (a >= best) {
+			if (a > best) {
 				best = a;
 			}
 		}
@@ -117,7 +117,7 @@ public class GameStateNode {
 		int worst = Integer.MAX_VALUE;
 		for (GameStateNode n : children) {
 			int a = n.getValue();
-			if (a <= worst) {
+			if (a < worst) {
 				worst = a;
 			}
 		}

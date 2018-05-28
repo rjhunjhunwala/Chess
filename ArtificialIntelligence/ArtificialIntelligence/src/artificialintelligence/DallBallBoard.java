@@ -14,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author Rohan
  */
-public class TicTacToeBoard implements Board {
+public class DallBallBoard implements Board {
 
 	/**
 	 * The empty tile cosntant
@@ -33,9 +33,9 @@ public class TicTacToeBoard implements Board {
 	 * Display Board
 	 */
 	public static void displayBoard() {
-		for (int i = 0; i < 3; i++) {
-			for (int j = 0; j < 3; j++) {
-				int tile = ((TicTacToeBoard) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 3 + j);
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 4; j++) {
+				int tile = ((DallBallBoard) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 4 + j);
 				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
 			}
 			System.out.println();
@@ -56,14 +56,18 @@ public class TicTacToeBoard implements Board {
 	 * As expected, plays tic tac toe
 	 */
 	public static void playTicTacToe() {
-		ArtificialIntelligence.mainBoard = new TicTacToeBoard(0);
+		ArtificialIntelligence.mainBoard = new DallBallBoard(0);
 		while (true) {
-			
 			displayBoard();
-			
-			ArtificialIntelligence.makeComputerMove();
-			displayBoard();
+			System.out.println("----");
+			System.out.println(ArtificialIntelligence.mainBoard.getValue());
+			System.out.println("----");
 			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), false);
+			displayBoard();
+			System.out.println("----");
+			System.out.println(ArtificialIntelligence.mainBoard.getValue());
+			System.out.println("----");
+			ArtificialIntelligence.makeComputerMove();
 		}
 	}
 
@@ -76,7 +80,7 @@ public class TicTacToeBoard implements Board {
 	 * @param tile the tile value (0 1 or 2)
 	 * @return the new version of state
 	 */
-	public static int manipulateState(int state, int spot, int tile) {
+	public static long manipulateState(long state, long spot, long tile) {
 		return (state & (~(3 << (spot * 2)))) + (tile << (spot * 2));
 
 	}
@@ -84,9 +88,9 @@ public class TicTacToeBoard implements Board {
 	/**
 	 * The following integer is used to store the whole array as an integer
 	 */
-	private int state = 0;
+	private long state = 0;
 
-	public TicTacToeBoard(int inState) {
+	public DallBallBoard(long inState) {
 		state = inState;
 	}
 
@@ -97,7 +101,7 @@ public class TicTacToeBoard implements Board {
 	 * @return
 	 */
 	public int getTileAtSpot(int spot) {
-		return (state & (3 << (spot << 1))) >> (spot << 1);
+		return (int) ((state & (3 << (spot << 1))) >> (spot << 1));
 	}
 
 	/**
@@ -116,7 +120,7 @@ public class TicTacToeBoard implements Board {
 	 *
 	 * @return the state
 	 */
-	public int getState() {
+	public long getState() {
 		return state;
 	}
 
@@ -128,16 +132,16 @@ public class TicTacToeBoard implements Board {
 	@Override
 	public int getValue() {
 		int value = 0;
-		for (int i = 0; i < 3; i++) {
-			int productRow = (getTileAtSpot(i) * getTileAtSpot(3 + i) * getTileAtSpot(6 + i));
-			int productColumn = (getTileAtSpot(3 * i) * getTileAtSpot(3 * i + 1) * getTileAtSpot(3 * i + 2));
+		for (int i = 0; i < 4; i++) {
+			int productRow = (getTileAtSpot(i) * getTileAtSpot(4 + i) * getTileAtSpot(8 + i) * getTileAtSpot(12 + i));
+			int productColumn = (getTileAtSpot(4 * i) * getTileAtSpot(4 * i + 1) * getTileAtSpot(4 * i + 2) * getTileAtSpot(4 * i + 3));
 			//add points for completed tic tac toes
 			value += getAddedPointsForProduct(productRow);
 			value += getAddedPointsForProduct(productColumn);
 		}
 //check diagonals
-		int prodDiagonalOne = (getTileAtSpot(0) * getTileAtSpot(4) * getTileAtSpot(8));
-		int prodDiagonalTwo = (getTileAtSpot(2) * getTileAtSpot(4) * getTileAtSpot(6));
+		int prodDiagonalOne = (getTileAtSpot(0) * getTileAtSpot(5) * getTileAtSpot(10) * getTileAtSpot(15));
+		int prodDiagonalTwo = (getTileAtSpot(3) * getTileAtSpot(6) * getTileAtSpot(9) * getTileAtSpot(12));
 		value += getAddedPointsForProduct(prodDiagonalOne);
 		value += getAddedPointsForProduct(prodDiagonalTwo);
 
@@ -153,13 +157,13 @@ public class TicTacToeBoard implements Board {
 	 * @return
 	 */
 	public static int getAddedPointsForProduct(int product) {
-		return (product & 1) - (product >> 3);
+		return ((product & 2) >> 1) - ((product & 8) >> 3);
 	}
 
 	@Override
 	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Move> moves = new ArrayList<>();
-		for (int i = 0; i < 9; i++) {
+		for (int i = 0; i < 16; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
 				moves.add(new TicTacToeMove(i));
 			}
@@ -178,7 +182,7 @@ public class TicTacToeBoard implements Board {
 	public Board makeMove(Move m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		int spot = ((TicTacToeMove) m).spot;
-		return new TicTacToeBoard(manipulateState(state, spot, tile));
+		return new DallBallBoard(manipulateState(state, spot, tile));
 	}
 
 	@Override

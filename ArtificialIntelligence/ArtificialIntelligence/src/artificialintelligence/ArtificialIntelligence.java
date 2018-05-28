@@ -13,7 +13,7 @@ public class ArtificialIntelligence {
 /**
 	* Maximum depth for brute force search
 	*/
-	public static int DEPTH = 20;
+	public static int DEPTH = 7;
 	/**
 		* The main board
 		*/
@@ -26,7 +26,6 @@ public static boolean isComputerTurn = true;
 
 public static void makeComputerMove(){
 	GameStateNode n = new GameStateNode(mainBoard,null,0,true);
-	System.out.println(n);
 	Move bestMove = n.getBestMove();
 	System.out.println(bestMove);
 mainBoard = mainBoard.makeMove(bestMove, true);
