@@ -13,7 +13,7 @@ public class ArtificialIntelligence {
 /**
 	* Maximum depth for brute force search
 	*/
-	public static int DEPTH = 7;
+	public static int DEPTH = 6;
 	/**
 		* The main board
 		*/
