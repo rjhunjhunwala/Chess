@@ -82,11 +82,9 @@ public class ArtificialIntelligence {
 			}
 		} else {
 			DEPTH = 10;
-			if (mainBoard.getPossibleMoves(true).size() < 15) {
+			if (mainBoard.getPossibleMoves(true).size() < 13) {
 				DEPTH += 1;
-			}			if (mainBoard.getPossibleMoves(true).size() < 13) {
-				DEPTH += 2;
-			}
+			}	
 		}
 		if (GameStateNode.GAME_IS_OTHELLO) {
 			((Othello) mainBoard).notGottenFromIllegalMove = 1;
@@ -130,6 +128,7 @@ public class ArtificialIntelligence {
 			this.setResizable(false);
 			this.add(new GamePanel());
 			this.pack();
+
 			this.addMouseListener(new MouseListener() {
 
 				@Override
@@ -165,6 +164,7 @@ public class ArtificialIntelligence {
 
 			});
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setAlwaysOnTop(true);
 		}
 	}
 
