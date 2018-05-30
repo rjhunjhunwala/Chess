@@ -39,10 +39,6 @@ public class GameStateNode {
 		lastMove = inLastMove;
 		depth = inDepth;
 		isComputerTurn = inIsComputerMove;
-		if (GAME_IS_OTHELLO && ((Othello) state).notGottenFromIllegalMove == 0) {
-			return;
-		}
-
 		if (depth < ArtificialIntelligence.DEPTH && !inState.isGameOver()) {
 			int nextDepth = depth + 1;
 			boolean nextTurn = !isComputerTurn;

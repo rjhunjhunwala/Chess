@@ -15,12 +15,12 @@ import java.util.ArrayList;
 public class Othello extends GenericBoardGame {
 	
 	public static final int STARTING_VALUE = 37773312;
-
 	/**
-		* This one's moderately sketchy, but work with me for a moment.
-		* It's an integer, which is zero iff the previous move is illegal
+		* Corners are counted as (C_B_W+1)*whoOccupiesIt
 		*/
-	public int notGottenFromIllegalMove = 1;
+	public static final int CORNER_BONUS_WEIGHT = 2;
+
+
 	/**
 	 * The empty tile cosntant
 	 */
@@ -144,23 +144,64 @@ public class Othello extends GenericBoardGame {
 	 */
 	@Override
 	public int getValue() {
+
 int value = 0;
 		for(int i = 0;i<25;i++){
 	value += getTileAtSpot(i)&1;
 }
-		return value;
+		value += CORNER_BONUS_WEIGHT *((getTileAtSpot(0)&1)-((getTileAtSpot(0)&2)<<2));
+		value += CORNER_BONUS_WEIGHT *((getTileAtSpot(4)&1)-((getTileAtSpot(4)&2)<<2));
+		value += CORNER_BONUS_WEIGHT *((getTileAtSpot(20)&1)-((getTileAtSpot(20)&2)<<2));
+		value += CORNER_BONUS_WEIGHT *((getTileAtSpot(24)&1)-((getTileAtSpot(24)&2)<<2));
+		return value; //* (1 - ((1 - notGottenFromIllegalMove)<<15));
 	}
 	@Override
 	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Move> moves = new ArrayList<>();
 		for (int i = 0; i < 25; i++) {
-			if (getTileAtSpot(i) == EMPTY) {
+			if (isLegalMove(i,isComputerMove)) {
 				moves.add(new TicTacToeMove(i));
 			}
 		}
 		return moves;
 	}
-
+public boolean isLegalMove(int spot, boolean isComputerMove){
+	int tile = isComputerMove ? X_TILE : O_TILE;
+ if(this.getTileAtSpot(spot)!=EMPTY){
+		return false;
+	}
+	int x = spot % 5;
+	int y = spot / 5;
+		for(int a = -1;a<2;a++){
+			for(int b = -1;b<2;b++){
+				if(a!=0||b!=0){
+				 int i = 1;
+					boolean foundEnd = false;
+	
+					while(true){
+						int xOne = x + a * i;
+						int yOne = y + b * i;
+						int z;
+						 if(xOne<0||xOne>=5||yOne<0||yOne>=5||(z = getTileAtSpot(yOne*5+xOne))==EMPTY){
+							break;
+						}
+						if(z==tile){
+							foundEnd = true;
+							break;
+						}
+							i++;
+						}
+					if(foundEnd){
+						//System.out.println("FOUND:"+i);
+					for(int j = 1;j<i;j++){
+return true;
+					}
+					}
+				}
+			}
+		}
+	return false;
+}
 	/**
 	 * Make a declared move based on it's description, and who's moving
 	 *
@@ -175,7 +216,6 @@ int value = 0;
 		int x = spot % 5;
 		int y = spot/5;
 		long newState = state;
-		int chipsFlipped = 0;
 		newState = manipulateState(state,spot,tile);
 		for(int a = -1;a<2;a++){
 			for(int b = -1;b<2;b++){
@@ -199,7 +239,7 @@ int value = 0;
 					if(foundEnd){
 						//System.out.println("FOUND:"+i);
 					for(int j = 1;j<i;j++){
-						chipsFlipped++;
+
 						newState = manipulateState(newState,(y+b*j)*5+(x+a*j),tile);
 					}
 					}
@@ -207,7 +247,7 @@ int value = 0;
 			}
 		}
 		Othello o = new Othello(newState);
-		o.notGottenFromIllegalMove = chipsFlipped;
+		
 		return o;
 		
 	}

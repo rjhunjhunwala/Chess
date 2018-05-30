@@ -10,6 +10,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import javax.swing.JFrame;
 
 /**
@@ -81,22 +82,20 @@ public class ArtificialIntelligence {
 				DEPTH = 6;
 			}
 		} else {
-			DEPTH = 10;
-			if (mainBoard.getPossibleMoves(true).size() < 13) {
-				DEPTH += 1;
-			}	
+			DEPTH = 9;
 		}
-		if (GameStateNode.GAME_IS_OTHELLO) {
-			((Othello) mainBoard).notGottenFromIllegalMove = 1;
-		}
-		Move bestMove = mainBoard.getPossibleMoves(true).get(0);
+ArrayList<Move> moves = mainBoard.getPossibleMoves(true);
+if(moves!=null&&!moves.isEmpty()){	
+Move bestMove = moves.get(0);
+	
 		try{
 		GameStateNode n = new GameStateNode(mainBoard, null, 0, true);
+
 		bestMove = n.getBestMove();
 		}catch(Exception ex){}
 		
 		mainBoard = mainBoard.makeMove(bestMove, true);
-		
+}
 		isComputerTurn = false;
 	}
 
@@ -110,6 +109,7 @@ public class ArtificialIntelligence {
 
 	public static void playGenericGame() {
 		g = new GameFrame();
+		makeComputerMove();
 		new Thread(new Runnable(){
 			public void run(){
 				for(;;){
