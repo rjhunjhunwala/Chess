@@ -14,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author Rohan
  */
-public class DallBallBoard implements Board {
+public class DallBallBoard extends GenericBoardGame {
 
 	/**
 	 * The empty tile cosntant
@@ -57,6 +57,8 @@ public class DallBallBoard implements Board {
 	 */
 	public static void playTicTacToe() {
 		ArtificialIntelligence.mainBoard = new DallBallBoard(0);
+
+		
 		while (true) {
 			displayBoard();
 			System.out.println("----");
@@ -80,8 +82,8 @@ public class DallBallBoard implements Board {
 	 * @param tile the tile value (0 1 or 2)
 	 * @return the new version of state
 	 */
-	public static long manipulateState(long state, long spot, long tile) {
-		return (state & (~(3 << (spot * 2)))) + (tile << (spot * 2));
+	public static int manipulateState(long state, int spot, int tile) {
+		return (int) (state & (~((long)3 << (spot << 1)))) + (tile << (spot << 1));
 
 	}
 
@@ -90,7 +92,7 @@ public class DallBallBoard implements Board {
 	 */
 	private long state = 0;
 
-	public DallBallBoard(long inState) {
+	public DallBallBoard(int inState) {
 		state = inState;
 	}
 
@@ -101,7 +103,7 @@ public class DallBallBoard implements Board {
 	 * @return
 	 */
 	public int getTileAtSpot(int spot) {
-		return (int) ((state & (3 << (spot << 1))) >> (spot << 1));
+		return (int) (((state & ( (long) 3 << (spot << 1))) >> (spot << 1)));
 	}
 
 	/**
@@ -182,6 +184,7 @@ public class DallBallBoard implements Board {
 	public Board makeMove(Move m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		int spot = ((TicTacToeMove) m).spot;
+		
 		return new DallBallBoard(manipulateState(state, spot, tile));
 	}
 

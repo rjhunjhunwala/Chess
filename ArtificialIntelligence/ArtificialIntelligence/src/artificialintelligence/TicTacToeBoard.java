@@ -14,7 +14,7 @@ import java.util.ArrayList;
  *
  * @author Rohan
  */
-public class TicTacToeBoard implements Board {
+public class TicTacToeBoard extends GenericBoardGame {
 
 	/**
 	 * The empty tile cosntant
@@ -77,7 +77,7 @@ public class TicTacToeBoard implements Board {
 	 * @return the new version of state
 	 */
 	public static int manipulateState(int state, int spot, int tile) {
-		return (state & (~(3 << (spot * 2)))) + (tile << (spot * 2));
+		return (state & (~(3 << (spot << 1)))) + (tile << (spot << 1));
 
 	}
 

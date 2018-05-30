@@ -8,14 +8,19 @@ package artificialintelligence;
 import java.util.ArrayList;
 
 /**
- * This class serves as a fancy decorator for an integer. Yes, even a Tic Tac
- * Toe board is at its core just a number We use shady bitshift to store (up to)
- * 15 2 bit integers in a single int
+ * This class serves as a fancy decorator for an integer.
  *
  * @author Rohan
  */
-public class Othello implements Board {
+public class Othello extends GenericBoardGame {
+	
+	public static final int STARTING_VALUE = 37773312;
 
+	/**
+		* This one's moderately sketchy, but work with me for a moment.
+		* It's an integer, which is zero iff the previous move is illegal
+		*/
+	public int notGottenFromIllegalMove = 1;
 	/**
 	 * The empty tile cosntant
 	 */
@@ -33,9 +38,9 @@ public class Othello implements Board {
 	 * Display Board
 	 */
 	public static void displayBoard() {
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 4; j++) {
-				int tile = ((Othello) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 4 + j);
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 5; j++) {
+				long tile = ((Othello) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 5  + j);
 				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
 			}
 			System.out.println();
@@ -56,7 +61,15 @@ public class Othello implements Board {
 	 * As expected, plays tic tac toe
 	 */
 	public static void playTicTacToe() {
-		ArtificialIntelligence.mainBoard = new Othello(0);
+	
+		ArtificialIntelligence.mainBoard = new Othello(STARTING_VALUE);
+//			boolean b = false;
+//		for(;b==b;){
+//			displayBoard();
+//					ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), b=!b);
+//	}
+		System.out.println(((Othello) (ArtificialIntelligence.mainBoard)).state);
+		
 		while (true) {
 			displayBoard();
 			System.out.println("----");
@@ -81,7 +94,7 @@ public class Othello implements Board {
 	 * @return the new version of state
 	 */
 	public static long manipulateState(long state, long spot, long tile) {
-		return (state & (~(3 << (spot * 2)))) + (tile << (spot * 2));
+		return (state & (~(((long) 3) << ((spot << 1))))) + (tile << (spot << 1));
 
 	}
 
@@ -101,7 +114,7 @@ public class Othello implements Board {
 	 * @return
 	 */
 	public int getTileAtSpot(int spot) {
-		return (int) ((state & (3 << (spot << 1))) >> (spot << 1));
+		return (int) (((state & (((long)3) << (spot << 1))) >> (spot << 1)));
 	}
 
 	/**
@@ -110,7 +123,7 @@ public class Othello implements Board {
 	 * @param spot the spot being indexed
 	 * @param tile the tile to set it to
 	 */
-	private void setTileAtSpot(int spot, int tile) {
+	private void setTileAtSpot(long spot, long tile) {
 		state = manipulateState(state, spot, tile);
 
 	}
@@ -131,39 +144,16 @@ public class Othello implements Board {
 	 */
 	@Override
 	public int getValue() {
-		int value = 0;
-		for (int i = 0; i < 4; i++) {
-			int productRow = (getTileAtSpot(i) * getTileAtSpot(4 + i) * getTileAtSpot(8 + i) * getTileAtSpot(12 + i));
-			int productColumn = (getTileAtSpot(4 * i) * getTileAtSpot(4 * i + 1) * getTileAtSpot(4 * i + 2) * getTileAtSpot(4 * i + 3));
-			//add points for completed tic tac toes
-			value += getAddedPointsForProduct(productRow);
-			value += getAddedPointsForProduct(productColumn);
-		}
-//check diagonals
-		int prodDiagonalOne = (getTileAtSpot(0) * getTileAtSpot(5) * getTileAtSpot(10) * getTileAtSpot(15));
-		int prodDiagonalTwo = (getTileAtSpot(3) * getTileAtSpot(6) * getTileAtSpot(9) * getTileAtSpot(12));
-		value += getAddedPointsForProduct(prodDiagonalOne);
-		value += getAddedPointsForProduct(prodDiagonalTwo);
-
+int value = 0;
+		for(int i = 0;i<25;i++){
+	value += getTileAtSpot(i)&1;
+}
 		return value;
 	}
-
-	/**
-	 * Determine whether or not a row is made based on the product, and determine
-	 * whether or not to add or subtract points accordingly Bitshift nonsense is
-	 * fully unjustifiable here, but fun nonetheless
-	 *
-	 * @param product the product of a line of three
-	 * @return
-	 */
-	public static int getAddedPointsForProduct(int product) {
-		return ((product & 2) >> 1) - ((product & 8) >> 3);
-	}
-
 	@Override
 	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Move> moves = new ArrayList<>();
-		for (int i = 0; i < 16; i++) {
+		for (int i = 0; i < 25; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
 				moves.add(new TicTacToeMove(i));
 			}
@@ -182,12 +172,49 @@ public class Othello implements Board {
 	public Board makeMove(Move m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		int spot = ((TicTacToeMove) m).spot;
-		return new Othello(manipulateState(state, spot, tile));
+		int x = spot % 5;
+		int y = spot/5;
+		long newState = state;
+		int chipsFlipped = 0;
+		newState = manipulateState(state,spot,tile);
+		for(int a = -1;a<2;a++){
+			for(int b = -1;b<2;b++){
+				if(a!=0||b!=0){
+				 int i = 1;
+					boolean foundEnd = false;
+	
+					while(true){
+						int xOne = x + a * i;
+						int yOne = y + b * i;
+						int z;
+						 if(xOne<0||xOne>=5||yOne<0||yOne>=5||(z = getTileAtSpot(yOne*5+xOne))==EMPTY){
+							break;
+						}
+						if(z==tile){
+							foundEnd = true;
+							break;
+						}
+							i++;
+						}
+					if(foundEnd){
+						//System.out.println("FOUND:"+i);
+					for(int j = 1;j<i;j++){
+						chipsFlipped++;
+						newState = manipulateState(newState,(y+b*j)*5+(x+a*j),tile);
+					}
+					}
+				}
+			}
+		}
+		Othello o = new Othello(newState);
+		o.notGottenFromIllegalMove = chipsFlipped;
+		return o;
+		
 	}
 
 	@Override
 	public boolean isGameOver() {
-		return getValue() != 0;
+		return false;
 	}
 
 }

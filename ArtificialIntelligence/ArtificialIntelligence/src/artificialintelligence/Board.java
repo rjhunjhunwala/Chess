@@ -13,6 +13,7 @@ import java.util.ArrayList;
  * @author rohan
  */
 public interface Board {
+
 public abstract boolean isGameOver();
 		/**
 		* Return some integer, such that more positive values are more favored to the

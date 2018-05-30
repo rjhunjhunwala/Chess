@@ -13,6 +13,12 @@ import java.util.ArrayList;
  */
 public class GameStateNode {
 
+	public static final boolean GAME_IS_OTHELLO;
+
+	static {
+		GAME_IS_OTHELLO = ArtificialIntelligence.mainBoard instanceof Othello;
+	}
+
 	private Board state;
 	private int depth = 0;
 	private boolean isComputerTurn;
@@ -33,8 +39,11 @@ public class GameStateNode {
 		lastMove = inLastMove;
 		depth = inDepth;
 		isComputerTurn = inIsComputerMove;
+		if (GAME_IS_OTHELLO && ((Othello) state).notGottenFromIllegalMove == 0) {
+			return;
+		}
 
-		if (depth < ArtificialIntelligence.DEPTH&&!inState.isGameOver()) {
+		if (depth < ArtificialIntelligence.DEPTH && !inState.isGameOver()) {
 			int nextDepth = depth + 1;
 			boolean nextTurn = !isComputerTurn;
 			ArrayList<Move> moves = state.getPossibleMoves(isComputerTurn);
@@ -75,7 +84,7 @@ public class GameStateNode {
 	 * moves
 	 */
 	public int getValue() {
-		if (children!=null&&!children.isEmpty()) {
+		if (children != null && !children.isEmpty()) {
 			if (isComputerTurn) {
 				//the computer can choose which of the paths it take, so logically the value of this node will be the best
 				return getBestChild();
@@ -84,9 +93,9 @@ public class GameStateNode {
 				return getWorstChild();
 			}
 		} else {
-		//perhaps quiescience search, but I'm not exactly competent...
+			//perhaps quiescience search, but I'm not exactly competent...
 			//just don't go further down the tree and call it a day...
-			return state.getValue();
+			return state.getValue()<<6+depth*3;
 		}
 	}
 
