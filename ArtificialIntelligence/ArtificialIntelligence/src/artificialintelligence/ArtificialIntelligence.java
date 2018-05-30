@@ -36,9 +36,11 @@ public class ArtificialIntelligence {
 				break;
 			case 2:
 			default:
-		mainBoard = new Othello(Othello.STARTING_VALUE);
-				SIZE = 5;
+	//	mainBoard = new Othello(Othello.STARTING_VALUE);
+			mainBoard = new Othello(Math.random()<.5?Othello.STARTING_VALUE:Othello.ALT_STARTING_VALUE);
+			SIZE = 5;
 		}
+
 	}
 	/**
 	 * The empty tile cosntant
@@ -85,7 +87,10 @@ public class ArtificialIntelligence {
 			DEPTH = 9;
 		}
 ArrayList<Move> moves = mainBoard.getPossibleMoves(true);
-if(moves!=null&&!moves.isEmpty()){	
+if(mainBoard.isGameOver()){
+	System.out.println("GAME OVER!");
+}
+if(!mainBoard.isGameOver()&&moves!=null&&!moves.isEmpty()){	
 Move bestMove = moves.get(0);
 	
 		try{
@@ -109,7 +114,6 @@ Move bestMove = moves.get(0);
 
 	public static void playGenericGame() {
 		g = new GameFrame();
-		makeComputerMove();
 		new Thread(new Runnable(){
 			public void run(){
 				for(;;){
@@ -117,6 +121,10 @@ Move bestMove = moves.get(0);
 				}
 			}
 		}).start();
+		
+							if(Math.random()<.5){
+				makeComputerMove();
+			}
 	}
 
 	public static class GameFrame extends javax.swing.JFrame {
@@ -143,13 +151,17 @@ Move bestMove = moves.get(0);
 					x /= GamePanel.SCALE;
 					y /= GamePanel.SCALE;
 					mainBoard = mainBoard.makeMove(new TicTacToeMove(y * SIZE + x), false);
-
+				//	System.out.println(((Othello)mainBoard).getState());
+//Othello.displayBoard();
+//System.out.println("-------\n");
 
 				}
 
 				@Override
 				public void mouseReleased(MouseEvent e) {
 				ArtificialIntelligence.makeComputerMove();
+				//Othello.displayBoard();
+				//System.out.println("-------\n");
 				}
 
 				@Override
