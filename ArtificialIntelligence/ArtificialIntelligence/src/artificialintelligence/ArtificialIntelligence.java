@@ -23,25 +23,7 @@ public class ArtificialIntelligence {
 	 * The size of the board
 	 */
 	public static final int SIZE;
-	static{
-		System.out.println("0: Tic Tac Toe, 1: Dall Ball 2: Othello/Reversi");
-		switch(new java.util.Scanner(System.in).nextInt()){
-			case 0:
-				mainBoard = new TicTacToeBoard(0);
-				SIZE = 3;
-				break;
-			case 1:
-				mainBoard = new DallBallBoard(0);
-				SIZE = 4;
-				break;
-			case 2:
-			default:
-	//	mainBoard = new Othello(Othello.STARTING_VALUE);
-			mainBoard = new Othello(Math.random()<.5?Othello.STARTING_VALUE:Othello.ALT_STARTING_VALUE);
-			SIZE = 5;
-		}
 
-	}
 	/**
 	 * The empty tile cosntant
 	 */
@@ -64,44 +46,57 @@ public class ArtificialIntelligence {
 	 */
 	public static Board mainBoard;
 
-	/**
-	 * Whether or not it is the computer's turn actually
-	 */
-	public static boolean isComputerTurn = true;
+	public static GameFrame g;
+
+	static {
+		System.out.println("0: Tic Tac Toe, 1: Dall Ball 2: Othello/Reversi (Small) 3: Othello/Reversi (Big)");
+		switch (new java.util.Scanner(System.in).nextInt()) {
+			case 0:
+				mainBoard = new TicTacToeBoard(0);
+				SIZE = 3;
+				break;
+			case 1:
+				mainBoard = new DallBallBoard(0);
+				SIZE = 4;
+				break;
+			case 2:
+			default:
+				//	mainBoard = new Othello(Othello.STARTING_VALUE);
+				mainBoard = new Othello(Math.random() < .5 ? Othello.STARTING_VALUE : Othello.ALT_STARTING_VALUE);
+				SIZE = 5;
+				break;
+			case 3:
+				mainBoard = new BigOthello();
+				SIZE = 8;
+				break;
+		}
+	}
 
 	public static void makeComputerMove() {
+		if (mainBoard.isGameOver()) {
+			System.out.println("GAME OVER!");
+			return;
+		} else if (mainBoard.getPossibleMoves(true).size() == 0) {
+			//no moves... do nothing
+			return;
+		}
+
 		if (mainBoard instanceof TicTacToeBoard) {
 			DEPTH = 10;
-		} else if (mainBoard instanceof DallBallBoard) {
-			int moves = mainBoard.getPossibleMoves(true).size();
-			if (moves < 10) {
-				DEPTH = 12;
-			} else if (moves < 12) {
-				DEPTH = 10;
-			} else if (moves < 14) {
-				DEPTH = 7;
-			} else {
-				DEPTH = 6;
-			}
 		} else {
-			DEPTH = 9;
+			int DEPTH = (int) (1+Math.log(20000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1));
 		}
-ArrayList<Move> moves = mainBoard.getPossibleMoves(true);
-if(mainBoard.isGameOver()){
-	System.out.println("GAME OVER!");
-}
-if(!mainBoard.isGameOver()&&moves!=null&&!moves.isEmpty()){	
-Move bestMove = moves.get(0);
-	
-		try{
+
 		GameStateNode n = new GameStateNode(mainBoard, null, 0, true);
 
-		bestMove = n.getBestMove();
-		}catch(Exception ex){}
-		
+		Move bestMove = n.getBestMove();
+
 		mainBoard = mainBoard.makeMove(bestMove, true);
-}
-		isComputerTurn = false;
+			if (mainBoard.isGameOver()) {
+			System.out.println("GAME OVER!");
+			return;
+		}
+		
 	}
 
 	/**
@@ -110,21 +105,20 @@ Move bestMove = moves.get(0);
 	public static void main(String[] args) {
 		playGenericGame();
 	}
-	public static GameFrame g;
 
 	public static void playGenericGame() {
 		g = new GameFrame();
-		new Thread(new Runnable(){
-			public void run(){
-				for(;;){
+		new Thread(new Runnable() {
+			public void run() {
+				for (;;) {
 					g.repaint();
 				}
 			}
 		}).start();
-		
-							if(Math.random()<.5){
-				makeComputerMove();
-			}
+
+		if (Math.random() < .5) {
+			makeComputerMove();
+		}
 	}
 
 	public static class GameFrame extends javax.swing.JFrame {
@@ -151,7 +145,7 @@ Move bestMove = moves.get(0);
 					x /= GamePanel.SCALE;
 					y /= GamePanel.SCALE;
 					mainBoard = mainBoard.makeMove(new TicTacToeMove(y * SIZE + x), false);
-				//	System.out.println(((Othello)mainBoard).getState());
+					//	System.out.println(((Othello)mainBoard).getState());
 //Othello.displayBoard();
 //System.out.println("-------\n");
 
@@ -159,9 +153,9 @@ Move bestMove = moves.get(0);
 
 				@Override
 				public void mouseReleased(MouseEvent e) {
-				ArtificialIntelligence.makeComputerMove();
-				//Othello.displayBoard();
-				//System.out.println("-------\n");
+					ArtificialIntelligence.makeComputerMove();
+					//Othello.displayBoard();
+					//System.out.println("-------\n");
 				}
 
 				@Override
@@ -176,7 +170,7 @@ Move bestMove = moves.get(0);
 
 			});
 			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setAlwaysOnTop(true);
+			this.setAlwaysOnTop(true);
 		}
 	}
 
