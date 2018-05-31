@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package artificialintelligence;
 
 import java.awt.Color;
@@ -14,6 +9,7 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 /**
+ * A modern Prometheus
  *
  * @author rohan
  */
@@ -45,9 +41,14 @@ public class ArtificialIntelligence {
 	 * The main board
 	 */
 	public static Board mainBoard;
-
+	/**
+	 * The graphics display
+	 */
 	public static GameFrame g;
 
+	/**
+	 * set up game
+	 */
 	static {
 		System.out.println("0: Tic Tac Toe, 1: Dall Ball 2: Othello/Reversi (Small) 3: Othello/Reversi (Big)");
 		switch (new java.util.Scanner(System.in).nextInt()) {
@@ -72,6 +73,9 @@ public class ArtificialIntelligence {
 		}
 	}
 
+	/**
+	 * Let the ai make it's move
+	 */
 	public static void makeComputerMove() {
 		if (mainBoard.isGameOver()) {
 			System.out.println("GAME OVER!");
@@ -84,7 +88,9 @@ public class ArtificialIntelligence {
 		if (mainBoard instanceof TicTacToeBoard) {
 			DEPTH = 10;
 		} else {
-			int DEPTH = (int) (1+Math.log(20000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1));
+			//create the depth by limiting us to searching through a max of about 2*10^6
+			//positions
+			int DEPTH = (int) (1 + Math.log(20000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1));
 		}
 
 		GameStateNode n = new GameStateNode(mainBoard, null, 0, true);
@@ -92,11 +98,11 @@ public class ArtificialIntelligence {
 		Move bestMove = n.getBestMove();
 
 		mainBoard = mainBoard.makeMove(bestMove, true);
-			if (mainBoard.isGameOver()) {
+		if (mainBoard.isGameOver()) {
 			System.out.println("GAME OVER!");
 			return;
 		}
-		
+
 	}
 
 	/**
@@ -106,6 +112,10 @@ public class ArtificialIntelligence {
 		playGenericGame();
 	}
 
+	/**
+	 * Plays a generic Game, A generic Game is any Board instance with a
+	 * getTileAtSpot method, and is some kind of square
+	 */
 	public static void playGenericGame() {
 		g = new GameFrame();
 		new Thread(new Runnable() {

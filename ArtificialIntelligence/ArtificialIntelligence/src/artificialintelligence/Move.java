@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package artificialintelligence;
 
 /**
- *
- * @author rohan
+ * The uselessness of this class is too baked into my architecture, so we'll leave it
+ * @author rohan, but let's pretend it's not
  */
 public class Move {
 	

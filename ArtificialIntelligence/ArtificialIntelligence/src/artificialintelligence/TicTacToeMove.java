@@ -1,16 +1,19 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package artificialintelligence;
 
 /**
- *
+ * Yes, I recognize this is just a dumbed down Integer class
  * @author rohan
  */
 public class TicTacToeMove extends Move{
+	/**
+		* The spot being used
+		*/
 	int spot;
+	/**
+		* Create a move on a given spot
+		* @param spot 
+		*/
 	public TicTacToeMove(int spot){
 		this.spot = spot;
 	}

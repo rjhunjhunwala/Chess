@@ -1,26 +1,24 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package artificialintelligence;
 
 import java.util.ArrayList;
 
 /**
-	* This class stores an Othello board using as many hacks as I came with
-	* Officially these hacks are for "performance", but to be entirely honest,
-	* they're fun
-	* @author rohan
-	*/
+ * This class stores an Othello board using as many hacks as I came with
+ * Officially these hacks are for "performance", but to be entirely honest,
+ * they're fun
+ *
+ * @author rohan
+ */
 public class BigOthello extends GenericBoardGame {
+
 	/**
-	 * Corners are counted as (C_B_W+1)*whoOccupiesIt
+	 * Corners receive a bonus of (C_B_W) for being owned, and a penalty for not
+	 * being owned of -C_B_W
 	 */
 	public static final int CORNER_BONUS_WEIGHT = 2;
 
 	/**
-	 * The empty tile cosntant
+	 * The empty tile constant
 	 */
 	public static final int EMPTY = 0;
 	/**
@@ -45,7 +43,6 @@ public class BigOthello extends GenericBoardGame {
 		}
 	}
 
-
 	/**
 	 * Returns a manipulated version of "state" so that the given spot now has a
 	 * given tile value
@@ -61,24 +58,27 @@ public class BigOthello extends GenericBoardGame {
 	}
 
 	/**
-	 * The following integer is used to store the whole array as an integer
+	 * The following iarray stores the state of the board through questionable
+	 * bitshift
 	 */
 	private int[] state = new int[8];
 
-/**
-	* Make an Othello board with the original starting configuration
-	*/
-	public BigOthello() {
-setTileAtSpot(state,27,X_TILE);
-setTileAtSpot(state,28,O_TILE);
-setTileAtSpot(state,36,X_TILE);
-setTileAtSpot(state,35,O_TILE);
-	}
 	/**
-		* makes an Othello board with an input state
-		* @param inState 
-		*/
-	public BigOthello(int[] inState){
+	 * Make an Othello board with the original starting configuration
+	 */
+	public BigOthello() {
+		setTileAtSpot(state, 27, X_TILE);
+		setTileAtSpot(state, 28, O_TILE);
+		setTileAtSpot(state, 36, X_TILE);
+		setTileAtSpot(state, 35, O_TILE);
+	}
+
+	/**
+	 * makes an Othello board with an input state
+	 *
+	 * @param inState
+	 */
+	public BigOthello(int[] inState) {
 		state = inState;
 	}
 
@@ -90,14 +90,14 @@ setTileAtSpot(state,35,O_TILE);
 	 * @return
 	 */
 	public int getTileAtSpot(int state, int spot) {
-		return (((state & (( 3) << (spot << 1))) >> (spot << 1)));
+		return (((state & ((3) << (spot << 1))) >> (spot << 1)));
 	}
 
-
 	/**
-	 * Evaluates a position for its "value"
+	 * Evaluates a position for its "value" Essentially counts the number of dots
+	 * the computer has, and adds a bonus for owning corners
 	 *
-	 * @return
+	 * @return a heuristic value of a board
 	 */
 	@Override
 	public int getValue() {
@@ -124,6 +124,13 @@ setTileAtSpot(state,35,O_TILE);
 		return moves;
 	}
 
+	/**
+	 * Checks if a spot is a legal move move
+	 *
+	 * @param spot the spot to move to
+	 * @param isComputerMove whether or not it's the computers move
+	 * @return
+	 */
 	public boolean isLegalMove(int spot, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		if (this.getTileAtSpot(spot) != EMPTY) {
@@ -175,8 +182,8 @@ setTileAtSpot(state,35,O_TILE);
 		int x = spot % 8;
 		int y = spot / 8;
 		//looks stupid, but 
-		int[] newState = new int[]{state[0],state[1],state[2],state[3],state[4],state[5],state[6],state[7]};
-		newState[y] = manipulateState(newState[y], x,tile);
+		int[] newState = new int[]{state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7]};
+		newState[y] = manipulateState(newState[y], x, tile);
 		for (int a = -1; a < 2; a++) {
 			for (int b = -1; b < 2; b++) {
 				if (a != 0 || b != 0) {
@@ -210,29 +217,32 @@ setTileAtSpot(state,35,O_TILE);
 		return o;
 
 	}
-/**
-	* Takes in an array of state, and sets a given spot to a given tile value
-	* @param toMod the given state to be modified in place
-	* @param spot the spot being used
-	* @param tile the tile being choosen
-	*/
-	public static void setTileAtSpot(int[] toMod, int spot,int tile){
-		toMod[spot>>3] = manipulateState(toMod[spot>>3], spot&7, tile);
+
+	/**
+	 * Takes in an array of state, and sets a given spot to a given tile value
+	 *
+	 * @param toMod the given state to be modified in place
+	 * @param spot the spot being used
+	 * @param tile the tile being chosen
+	 */
+	public static void setTileAtSpot(int[] toMod, int spot, int tile) {
+		toMod[spot >> 3] = manipulateState(toMod[spot >> 3], spot & 7, tile);
 	}
-	
+
 	@Override
 	public boolean isGameOver() {
 		return false;
 	}
 
 	/**
-		* Gets a tile at a given spot (sorry, had to)
-		* @param spot
-		* @return 
-		*/
+	 * Gets a tile at a given spot (sorry, had to)
+	 *
+	 * @param spot
+	 * @return
+	 */
 	@Override
 	public int getTileAtSpot(int spot) {
-		return (state[spot>>3]&(3<<((spot&7)<<1)))>>((spot&7)<<1);
+		return (state[spot >> 3] & (3 << ((spot & 7) << 1))) >> ((spot & 7) << 1);
 	}
 
 }

@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package artificialintelligence;
 
 import java.util.ArrayList;
@@ -13,7 +9,7 @@ import java.util.ArrayList;
  * @author Rohan
  */
 public class Othello extends GenericBoardGame {
-
+	
 	public static final int STARTING_VALUE = 37773312;
 	public static final int ALT_STARTING_VALUE = 25202688;
 	
@@ -23,7 +19,7 @@ public class Othello extends GenericBoardGame {
 	public static final int CORNER_BONUS_WEIGHT = 2;
 
 	/**
-	 * The empty tile cosntant
+	 * The empty tile constant
 	 */
 	public static final int EMPTY = 0;
 	/**
@@ -35,55 +31,6 @@ public class Othello extends GenericBoardGame {
 	 */
 	public static final int O_TILE = 2;
 
-	/**
-	 * Display Board
-	 */
-	public static void displayBoard() {
-		for (int i = 0; i < 5; i++) {
-			for (int j = 0; j < 5; j++) {
-				long tile = ((Othello) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 5 + j);
-				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
-			}
-			System.out.println();
-		}
-	}
-
-	/**
-	 * Main method
-	 *
-	 * @param args the command line arguments
-	 */
-	public static void main(String[] args) {
-
-		playTicTacToe();
-	}
-
-	/**
-	 * As expected, plays tic tac toe
-	 */
-	public static void playTicTacToe() {
-
-		ArtificialIntelligence.mainBoard = new Othello(STARTING_VALUE);
-//			boolean b = false;
-//		for(;b==b;){
-//			displayBoard();
-//					ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), b=!b);
-//	}
-		System.out.println(((Othello) (ArtificialIntelligence.mainBoard)).state);
-
-		while (true) {
-			displayBoard();
-			System.out.println("----");
-			System.out.println(ArtificialIntelligence.mainBoard.getValue());
-			System.out.println("----");
-			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), false);
-			displayBoard();
-			System.out.println("----");
-			System.out.println(ArtificialIntelligence.mainBoard.getValue());
-			System.out.println("----");
-			ArtificialIntelligence.makeComputerMove();
-		}
-	}
 
 	/**
 	 * Returns a manipulated version of "state" so that the given spot now has a
@@ -139,9 +86,10 @@ public class Othello extends GenericBoardGame {
 	}
 
 	/**
-	 * Evaluates a position for a win
+	 * Evaluates a position for it's value, basically counting computer dots, 
+		* and awarding the computer for corners
 	 *
-	 * @return
+	 * @return the "Value" (heuristically)
 	 */
 	@Override
 	public int getValue() {
@@ -156,7 +104,11 @@ public class Othello extends GenericBoardGame {
 		value += CORNER_BONUS_WEIGHT * ((getTileAtSpot(24) & 1) - ((getTileAtSpot(24) & 2) << 2));
 		return value; //* (1 - ((1 - notGottenFromIllegalMove)<<15));
 	}
-
+/**
+	* Gets a list of the legal moves available
+	* @param isComputerMove whether or not it's the computer turn
+	* @return the list of valid moves
+	*/
 	@Override
 	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Move> moves = new ArrayList<>();
@@ -168,6 +120,12 @@ public class Othello extends GenericBoardGame {
 		return moves;
 	}
 
+	/**
+		* Checks legality
+		* @param spot to move to
+		* @param isComputerMove whether not the computer is moving
+		* @return whether or not the move is legal
+		*/
 	public boolean isLegalMove(int spot, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		if (this.getTileAtSpot(spot) != EMPTY) {
@@ -195,7 +153,6 @@ public class Othello extends GenericBoardGame {
 						i++;
 					}
 					if (foundEnd) {
-						//System.out.println("FOUND:"+i);
 						for (int j = 1; j < i; j++) {
 							return true;
 						}
@@ -241,9 +198,7 @@ public class Othello extends GenericBoardGame {
 						i++;
 					}
 					if (foundEnd) {
-						//System.out.println("FOUND:"+i);
 						for (int j = 1; j < i; j++) {
-
 							newState = manipulateState(newState, (y + b * j) * 5 + (x + a * j), tile);
 						}
 					}
@@ -255,7 +210,10 @@ public class Othello extends GenericBoardGame {
 		return o;
 
 	}
-
+/**
+	* Checks whether or not we should end the game pre-maturely
+	* @return 
+	*/
 	@Override
 	public boolean isGameOver() {
 		return false;

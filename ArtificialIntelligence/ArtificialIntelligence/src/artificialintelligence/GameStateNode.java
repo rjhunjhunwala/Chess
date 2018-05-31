@@ -1,28 +1,31 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package artificialintelligence;
 
 import java.util.ArrayList;
 
 /**
- *
+ * One single node in the tree
  * @author rohan
  */
 public class GameStateNode {
 
-	public static final boolean GAME_IS_OTHELLO;
-
-	static {
-		GAME_IS_OTHELLO = ArtificialIntelligence.mainBoard instanceof Othello;
-	}
-
+/**
+	* The current state
+	*/
 	private Board state;
+//how far down the tree we are
 	private int depth = 0;
+	/**
+		* Whether or not it's the computers turn
+		*/
 	private boolean isComputerTurn;
+	/**
+		* What the last move made was to get to this point
+		*/
 	private Move lastMove;
+	/**
+		* The nodes that can be reached from this node
+		*/
 	private ArrayList<GameStateNode> children;
 
 	/**

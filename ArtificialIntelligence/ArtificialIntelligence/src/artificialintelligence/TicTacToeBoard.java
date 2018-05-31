@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package artificialintelligence;
 
 import java.util.ArrayList;
@@ -17,7 +13,7 @@ import java.util.ArrayList;
 public class TicTacToeBoard extends GenericBoardGame {
 
 	/**
-	 * The empty tile cosntant
+	 * The empty tile constant
 	 */
 	public static final int EMPTY = 0;
 	/**
@@ -58,9 +54,7 @@ public class TicTacToeBoard extends GenericBoardGame {
 	public static void playTicTacToe() {
 		ArtificialIntelligence.mainBoard = new TicTacToeBoard(0);
 		while (true) {
-			
 			displayBoard();
-			
 			ArtificialIntelligence.makeComputerMove();
 			displayBoard();
 			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), false);
@@ -83,15 +77,22 @@ public class TicTacToeBoard extends GenericBoardGame {
 
 	/**
 	 * The following integer is used to store the whole array as an integer
+		* The bitshift associated with storing 9 values in a single int is moderately
+		* sketchy, and beyond the scope of a single comment
 	 */
 	private int state = 0;
 
+	
+	/**
+		* Intialize a board with a given inState
+		* @param inState the initial state
+		*/
 	public TicTacToeBoard(int inState) {
 		state = inState;
 	}
 
 	/**
-	 * Get's the tile associated with a certain spot
+	 * Gets the tile associated with a certain spot
 	 *
 	 * @param spot return the spot being used
 	 * @return
@@ -147,7 +148,8 @@ public class TicTacToeBoard extends GenericBoardGame {
 	/**
 	 * Determine whether or not a row is made based on the product, and determine
 	 * whether or not to add or subtract points accordingly Bitshift nonsense is
-	 * fully unjustifiable here, but fun nonetheless
+	 * fully unjustifiable here, but fun nonetheless, and a branchless alternative
+		* this speeds up performance (I think, but haven't proved it)
 	 *
 	 * @param product the product of a line of three
 	 * @return
@@ -156,6 +158,12 @@ public class TicTacToeBoard extends GenericBoardGame {
 		return (product & 1) - (product >> 3);
 	}
 
+	
+	/**
+		* Functions as expected
+		* @param isComputerMove whether or not it's the computer move
+		* @return just a list of open squares
+		*/
 	@Override
 	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Move> moves = new ArrayList<>();
@@ -181,6 +189,10 @@ public class TicTacToeBoard extends GenericBoardGame {
 		return new TicTacToeBoard(manipulateState(state, spot, tile));
 	}
 
+	/**
+		* Game is over, if someone has won (the magnitude of the value is non-zero)
+		* @return whether or not someone has won
+		*/
 	@Override
 	public boolean isGameOver() {
 		return getValue() != 0;
