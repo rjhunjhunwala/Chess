@@ -58,7 +58,7 @@ public class BigOthello extends GenericBoardGame {
 	}
 
 	/**
-	 * The following iarray stores the state of the board through questionable
+	 * The following array stores the state of the board through questionable
 	 * bitshift
 	 */
 	private int[] state = new int[8];
@@ -83,17 +83,6 @@ public class BigOthello extends GenericBoardGame {
 	}
 
 	/**
-	 * Get's the tile associated with a certain spot
-	 *
-	 * @param state the state of a given row
-	 * @param spot return the spot being used
-	 * @return
-	 */
-	public int getTileAtSpot(int state, int spot) {
-		return (((state & ((3) << (spot << 1))) >> (spot << 1)));
-	}
-
-	/**
 	 * Evaluates a position for its "value" Essentially counts the number of dots
 	 * the computer has, and adds a bonus for owning corners
 	 *
@@ -114,11 +103,11 @@ public class BigOthello extends GenericBoardGame {
 	}
 
 	@Override
-	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
-		ArrayList<Move> moves = new ArrayList<>();
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
+		ArrayList<Integer> moves = new ArrayList<>();
 		for (int i = 0; i < 64; i++) {
 			if (isLegalMove(i, isComputerMove)) {
-				moves.add(new TicTacToeMove(i));
+				moves.add(i);
 			}
 		}
 		return moves;
@@ -136,7 +125,7 @@ public class BigOthello extends GenericBoardGame {
 		if (this.getTileAtSpot(spot) != EMPTY) {
 			return false;
 		}
-		int x = spot % 8;
+		int x = spot & 7;
 		int y = spot / 8;
 		for (int a = -1; a < 2; a++) {
 			for (int b = -1; b < 2; b++) {
@@ -168,6 +157,9 @@ public class BigOthello extends GenericBoardGame {
 		return false;
 	}
 
+	public int getSize(){
+		return 8;
+	}
 	/**
 	 * Make a declared move based on it's description, and who's moving
 	 *
@@ -176,10 +168,10 @@ public class BigOthello extends GenericBoardGame {
 	 * @return a new copy of the board. Note, boards, are generally immutable,
 	 */
 	@Override
-	public Board makeMove(Move m, boolean isComputerMove) {
+	public Board makeMove(int m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
-		int spot = ((TicTacToeMove) m).spot;
-		int x = spot % 8;
+		int spot = m;
+		int x = spot & 7;
 		int y = spot / 8;
 		//looks stupid, but 
 		int[] newState = new int[]{state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7]};

@@ -110,11 +110,11 @@ public class Othello extends GenericBoardGame {
 	* @return the list of valid moves
 	*/
 	@Override
-	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
-		ArrayList<Move> moves = new ArrayList<>();
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
+		ArrayList<Integer> moves = new ArrayList<>();
 		for (int i = 0; i < 25; i++) {
 			if (isLegalMove(i, isComputerMove)) {
-				moves.add(new TicTacToeMove(i));
+				moves.add((i));
 			}
 		}
 		return moves;
@@ -162,7 +162,10 @@ public class Othello extends GenericBoardGame {
 		}
 		return false;
 	}
-
+public int getSize(){
+	return 5;
+}
+	
 	/**
 	 * Make a declared move based on it's description, and who's moving
 	 *
@@ -171,9 +174,9 @@ public class Othello extends GenericBoardGame {
 	 * @return a new copy of the board. Note, boards, are generally immutable,
 	 */
 	@Override
-	public Board makeMove(Move m, boolean isComputerMove) {
+	public Board makeMove(int m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
-		int spot = ((TicTacToeMove) m).spot;
+		int spot = m;
 		int x = spot % 5;
 		int y = spot / 5;
 		long newState = state;

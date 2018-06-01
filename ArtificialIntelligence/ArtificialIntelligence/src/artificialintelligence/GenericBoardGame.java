@@ -12,5 +12,8 @@ public abstract class GenericBoardGame implements Board {
 		* @return the tile at that spot
 		*/
 	public abstract int getTileAtSpot(int spot);
-
+/**
+	* Get Size of square
+	*/
+public abstract int getSize();
 }

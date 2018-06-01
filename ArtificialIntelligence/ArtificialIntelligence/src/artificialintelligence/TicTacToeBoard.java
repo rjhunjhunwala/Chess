@@ -57,7 +57,7 @@ public class TicTacToeBoard extends GenericBoardGame {
 			displayBoard();
 			ArtificialIntelligence.makeComputerMove();
 			displayBoard();
-			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), false);
+			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new java.util.Scanner(System.in).nextInt(), false);
 		}
 	}
 
@@ -165,11 +165,11 @@ public class TicTacToeBoard extends GenericBoardGame {
 		* @return just a list of open squares
 		*/
 	@Override
-	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
-		ArrayList<Move> moves = new ArrayList<>();
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
+		ArrayList<Integer> moves = new ArrayList<>();
 		for (int i = 0; i < 9; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
-				moves.add(new TicTacToeMove(i));
+				moves.add(i);
 			}
 		}
 		return moves;
@@ -183,12 +183,14 @@ public class TicTacToeBoard extends GenericBoardGame {
 	 * @return a new copy of the board. Note, boards, are generally immutable,
 	 */
 	@Override
-	public Board makeMove(Move m, boolean isComputerMove) {
+	public Board makeMove(int m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
-		int spot = ((TicTacToeMove) m).spot;
+		int spot = m;
 		return new TicTacToeBoard(manipulateState(state, spot, tile));
 	}
-
+public int getSize(){
+	return 3;
+}
 	/**
 		* Game is over, if someone has won (the magnitude of the value is non-zero)
 		* @return whether or not someone has won

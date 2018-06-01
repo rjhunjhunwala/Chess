@@ -19,10 +19,7 @@ public class GameStateNode {
 		* Whether or not it's the computers turn
 		*/
 	private boolean isComputerTurn;
-	/**
-		* What the last move made was to get to this point
-		*/
-	private Move lastMove;
+
 	/**
 		* The nodes that can be reached from this node
 		*/
@@ -37,18 +34,17 @@ public class GameStateNode {
 	 * @param inIsComputerMove whether or not, the computer is yet to move in this
 	 * case
 	 */
-	public GameStateNode(Board inState, Move inLastMove, int inDepth, boolean inIsComputerMove) {
+	public GameStateNode(Board inState, int inDepth, boolean inIsComputerMove) {
 		state = inState;
-		lastMove = inLastMove;
 		depth = inDepth;
 		isComputerTurn = inIsComputerMove;
 		if (depth < ArtificialIntelligence.DEPTH && !inState.isGameOver()) {
 			int nextDepth = depth + 1;
 			boolean nextTurn = !isComputerTurn;
-			ArrayList<Move> moves = state.getPossibleMoves(isComputerTurn);
+			ArrayList<Integer> moves = state.getPossibleMoves(isComputerTurn);
 			children = new ArrayList<>(moves.size());
-			for (Move m : moves) {
-				children.add(new GameStateNode(inState.makeMove(m, isComputerTurn), m, nextDepth, nextTurn));
+			for (Integer m : moves) {
+				children.add(new GameStateNode(inState.makeMove(m, isComputerTurn), nextDepth, nextTurn));
 			}
 		}
 	}
@@ -58,17 +54,20 @@ public class GameStateNode {
 	 *
 	 * @return the best move
 	 */
-	public Move getBestMove() {
-		Move bestMove = null;
+	public int getBestMove() {
+		int bestMove = -1;
+		int index = 0;
+		int i = 0;
 		int bestValue = Integer.MIN_VALUE;
 		for (GameStateNode node : children) {
 			int value = node.getValue();
 			if (value > bestValue) {
 				bestValue = value;
-				bestMove = node.lastMove;
+				index = i;
 			}
+		i++;
 		}
-		return bestMove;
+		return state.getPossibleMoves(isComputerTurn).get(index);
 	}
 
 	/**

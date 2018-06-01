@@ -60,7 +60,7 @@ public class DallBallBoard extends GenericBoardGame {
 			System.out.println("----");
 			System.out.println(ArtificialIntelligence.mainBoard.getValue());
 			System.out.println("----");
-			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new TicTacToeMove(new java.util.Scanner(System.in).nextInt()), false);
+			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove((new java.util.Scanner(System.in).nextInt()), false);
 			displayBoard();
 			System.out.println("----");
 			System.out.println(ArtificialIntelligence.mainBoard.getValue());
@@ -145,6 +145,9 @@ public class DallBallBoard extends GenericBoardGame {
 
 		return value;
 	}
+	public int getSize(){
+		return 4;
+	}
 
 	/**
 	 * Determine whether or not a row is made based on the product, and determine
@@ -159,11 +162,11 @@ public class DallBallBoard extends GenericBoardGame {
 	}
 
 	@Override
-	public ArrayList<Move> getPossibleMoves(boolean isComputerMove) {
-		ArrayList<Move> moves = new ArrayList<>();
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
+		ArrayList<Integer> moves = new ArrayList<>();
 		for (int i = 0; i < 16; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
-				moves.add(new TicTacToeMove(i));
+				moves.add(i);
 			}
 		}
 		return moves;
@@ -177,10 +180,9 @@ public class DallBallBoard extends GenericBoardGame {
 	 * @return a new copy of the board. Note, boards, are generally immutable,
 	 */
 	@Override
-	public Board makeMove(Move m, boolean isComputerMove) {
+	public Board makeMove(int m, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
-		int spot = ((TicTacToeMove) m).spot;
-		
+		int spot = m;
 		return new DallBallBoard(manipulateState(state, spot, tile));
 	}
 

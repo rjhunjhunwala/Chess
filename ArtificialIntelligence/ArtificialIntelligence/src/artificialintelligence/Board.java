@@ -32,7 +32,7 @@ public interface Board {
 	 * @param isComputerMove A boolean determining whether or not we are looking at
 	 * moves for the human or computer
 	 */
-	public abstract ArrayList<Move> getPossibleMoves(boolean isComputerMove);
+	public abstract ArrayList<Integer> getPossibleMoves(boolean isComputerMove);
 
 	/**
 	 * Make a move and return, the board resulting from the new state
@@ -41,5 +41,5 @@ public interface Board {
 	 * @param isComputerTurn whether or not the move is being made by the computer
 	 * @return The new board after the move has been made
 	 */
-	public abstract Board makeMove(Move m, boolean isComputerTurn);
+	public abstract Board makeMove(int spot, boolean isComputerTurn);
 }
