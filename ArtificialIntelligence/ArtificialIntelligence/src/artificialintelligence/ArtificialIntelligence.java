@@ -271,7 +271,7 @@ public class ArtificialIntelligence {
 
 		public GameFrame() {
 
-			super("Jocor Ludique");
+			super("Delicii Ludique (Fun and Games)");
 			this.setJMenuBar(buildMenuBar());
 			this.setVisible(true);
 			this.setResizable(false);
