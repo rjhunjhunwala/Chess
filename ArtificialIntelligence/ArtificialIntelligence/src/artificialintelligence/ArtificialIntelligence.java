@@ -65,7 +65,7 @@ public class ArtificialIntelligence {
 			setUpNewGame(game);
 			g.dispose();
 			g = new GameFrame();
-						if (!humanPlaysFirst) {
+			if (!humanPlaysFirst) {
 				makeComputerMove();
 			}
 		}
@@ -106,26 +106,45 @@ public class ArtificialIntelligence {
 	 */
 	public static void makeComputerMove() {
 		if (mainBoard.isGameOver()) {
+			System.out.println(mainBoard.getValue());
 			System.out.println("GAME OVER!");
 			return;
 		} else if (mainBoard.getPossibleMoves(true).size() == 0) {
 			//no moves... do nothing
 			return;
+		} else if (mainBoard.getPossibleMoves(true).size() == 1) {
+			//only one move, don't over-think it
+			mainBoard = mainBoard.makeMove(mainBoard.getPossibleMoves(true).get(0), true);
 		}
 
 		if (mainBoard instanceof TicTacToeBoard) {
 			DEPTH = 10;
 		} else {
-			//create the depth by limiting us to searching through a max of about 2*10^6
+			//create the depth by limiting us to searching through a max number of possibilties
 			//positions
-			int DEPTH = (int) (1 + Math.log(20000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1));
+			int DEPTH = (int) (Math.log(10000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1) - 1);
+
+			if (mainBoard instanceof BigOthello) {
+				DEPTH -= 1;
+				if (DEPTH > 8) {
+					DEPTH = 8;
+				}
+			}
+
+			if (mainBoard instanceof Chess) {
+				if (DEPTH > 7) {
+					DEPTH = 7;
+				}
+			}
+			ArtificialIntelligence.DEPTH = DEPTH;
 		}
 
 		GameStateNode n = new GameStateNode(mainBoard, 0, true);
 
 		Integer bestMove = n.getBestMove();
-
-		mainBoard = mainBoard.makeMove(bestMove, true);
+		if (bestMove != -1) {
+			mainBoard = mainBoard.makeMove(bestMove, true);
+		}
 		if (mainBoard.isGameOver()) {
 			System.out.println("GAME OVER!");
 			return;
@@ -228,6 +247,8 @@ public class ArtificialIntelligence {
 		public static final int OFFSET = (int) (SCALE * .15);
 		public static final int TOKEN_SIZE = SCALE - OFFSET * 2;
 
+		public static int mouseDownLoc;
+
 		/**
 		 * the color that the AI uses, and what is "BLACK";
 		 */
@@ -255,18 +276,38 @@ public class ArtificialIntelligence {
 					int y = e.getY();
 					x /= GamePanel.SCALE;
 					y /= GamePanel.SCALE;
-					mainBoard = mainBoard.makeMove((y * getSIZE() + x), false);
-					//	System.out.println(((Othello)mainBoard).getState());
-//Othello.displayBoard();
-//System.out.println("-------\n");
+					mouseDownLoc = y * getSIZE() + x;
+					if (!(mainBoard instanceof Chess)) {
+						mainBoard = mainBoard.makeMove(mouseDownLoc, false);
+					}
 
 				}
 
 				@Override
 				public void mouseReleased(MouseEvent e) {
-					ArtificialIntelligence.makeComputerMove();
-					//Othello.displayBoard();
-					//System.out.println("-------\n");
+					int x = e.getX();
+					int y = e.getY();
+					x /= GamePanel.SCALE;
+					y /= GamePanel.SCALE;
+					int move = (((y << 3) + x) << 6) + mouseDownLoc;
+					if (mainBoard instanceof Chess) {
+						if (mainBoard.getPossibleMoves(false).contains(move)) {
+							mainBoard = mainBoard.makeMove(move, false);
+							g.repaint();
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										Thread.sleep(100);
+									} catch (Exception ex) {
+
+									}
+									ArtificialIntelligence.makeComputerMove();
+								}
+							}).start();
+						}
+					} else {
+						ArtificialIntelligence.makeComputerMove();
+					}
 				}
 
 				@Override

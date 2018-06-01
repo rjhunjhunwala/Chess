@@ -2,6 +2,7 @@
 package artificialintelligence;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * One single node in the tree
@@ -41,7 +42,7 @@ public class GameStateNode {
 		if (depth < ArtificialIntelligence.DEPTH && !inState.isGameOver()) {
 			int nextDepth = depth + 1;
 			boolean nextTurn = !isComputerTurn;
-			ArrayList<Integer> moves = state.getPossibleMoves(isComputerTurn);
+			List<Integer> moves = state.getPossibleMoves(isComputerTurn);
 			children = new ArrayList<>(moves.size());
 			for (Integer m : moves) {
 				children.add(new GameStateNode(inState.makeMove(m, isComputerTurn), nextDepth, nextTurn));
@@ -67,8 +68,12 @@ public class GameStateNode {
 			}
 		i++;
 		}
+		if(state.getPossibleMoves(isComputerTurn).isEmpty()){
+			return -1;
+		}else{
 		return state.getPossibleMoves(isComputerTurn).get(index);
-	}
+		}
+		}
 
 	/**
 	 * Get's the expected "value" of the board for a given move by recursively
@@ -93,7 +98,7 @@ public class GameStateNode {
 		} else {
 			//perhaps quiescience search, but I'm not exactly competent...
 			//just don't go further down the tree and call it a day...
-			return state.getValue()<<6+depth*3;
+			return state.getValue()<<6+depth;
 		}
 	}
 

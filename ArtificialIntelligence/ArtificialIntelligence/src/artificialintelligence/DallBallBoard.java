@@ -2,6 +2,8 @@
 package artificialintelligence;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This class serves as a fancy decorator for an integer. Yes, even a Tic Tac
@@ -162,8 +164,8 @@ public class DallBallBoard extends GenericBoardGame {
 	}
 
 	@Override
-	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
-		ArrayList<Integer> moves = new ArrayList<>();
+	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove) {
+		LinkedList<Integer> moves = new LinkedList<>();
 		for (int i = 0; i < 16; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
 				moves.add(i);
