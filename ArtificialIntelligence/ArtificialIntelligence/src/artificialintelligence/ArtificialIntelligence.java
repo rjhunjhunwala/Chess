@@ -132,8 +132,8 @@ public class ArtificialIntelligence {
 			}
 
 			if (mainBoard instanceof Chess) {
-				if (DEPTH > 7) {
-					DEPTH = DEPTH>12?9:7;
+				if (DEPTH > 5) {
+					DEPTH = 5;
 				}
 			}
 			ArtificialIntelligence.DEPTH = DEPTH;
@@ -229,7 +229,7 @@ public class ArtificialIntelligence {
 
 		public GameFrame() {
 
-			super("Jocor ludusque");
+			super("Jocor Ludique");
 			this.setJMenuBar(buildMenuBar());
 			this.setVisible(true);
 			this.setResizable(false);
