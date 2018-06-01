@@ -1,7 +1,12 @@
 package artificialintelligence;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import javax.imageio.ImageIO;
 
 /**
  * The way we represent a chess board
@@ -77,11 +82,10 @@ public class Chess extends GenericBoardGame {
 		VALUES[QUEEN] = QUEEN_VALUE;
 		VALUES[KING] = KING_VALUE;
 	}
-	
-	public static final int[] PAWN_VALUE_TABLE = {0,30,40,50,70,150,350};
-	
-	//======End of Constants======
 
+	public static final int[] PAWN_VALUE_TABLE = {0, 30, 40, 50, 70, 150, 350};
+
+	//======End of Constants======
 	/**
 	 * Ok, so we store the state of a single chessboard as an array of longs This
 	 * is for "performance" and "memory optimization" reasons (I think it helps but
@@ -175,7 +179,7 @@ public class Chess extends GenericBoardGame {
 				if ((piece & 8) == 8) {
 					value += PAWN_VALUE_TABLE[(i >> 3)];
 				} else {
-			value -= PAWN_VALUE_TABLE[(~(i >> 3))&7];
+					value -= PAWN_VALUE_TABLE[(~(i >> 3)) & 7];
 				}
 			}
 		}
@@ -679,5 +683,43 @@ public class Chess extends GenericBoardGame {
 		Chess.setTileAtSpot(newState, end, tile);
 		return new Chess(newState);
 	}
+
+//Chess Graphics stuff
+	//These images have been used from the public domain
+	//https://creativecommons.org/licenses/by-sa/3.0/
+	public static final int SOURCE_SIZE = 45;
+
+	public static void main(String[] args) throws IOException {
+		BufferedImage b = ImageIO.read(new File("WHITE_PAWN.png"));
+		System.out.print("public static final long[] PAWN_SPRITE = new long[]{");
+		for (int i = 0; i < SOURCE_SIZE; i++) {
+			long output = 0;
+			for (int j = 0; j < SOURCE_SIZE; j++) {
+
+				Color thisColor = new Color(b.getRGB(j, i));
+				if (thisColor.getGreen() + thisColor.getRed() + thisColor.getGreen() > 100) {
+					output += ((long) 1) << j;
+				}
+			}
+			System.out.print(output + "l,");
+		}
+		System.out.println("};");
+	}
+	/**
+	 * All right, here's where it gets questionable.... What's a good data-type to
+	 * store an image? Think about it for a bit? Have an answer? You're wrong. We
+	 * use an array of longs, to store a serialized image. each line represents one
+	 * line of the image, and each bit in the long represents whether or not that
+	 * pixel is active...
+	 */
+public static final long[] KING_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,4194304l,14680064l,32505856l,32505856l,15064897536l,68483612160l,137404612352l,274859556736l,274860081024l,549745328064l,549749522368l,274873712576l,274873712512l,137434759040l,68715282176l,34344009216l,16172988416l,1073725440l,4294963200l,4026593280l,2684325888l,2147475456l,4279234560l,3288084480l,1073725440l,2147475456l,268369920l,0l,0l,0l,0l,0l,0l,};
+public static final long[] QUEEN_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,14680064l,14704640l,3235966976l,3221250048l,0l,824633720928l,824633720928l,0l,4194304l,1077985280l,1616953344l,1625341952l,70613319936l,104973058816l,122153060096l,53567800832l,62175563264l,66537905664l,64961486336l,268304384l,34359737344l,34359737344l,17179867136l,0l,4294959104l,4294959104l,4228374528l,1073709056l,8589930496l,17179867136l,17179867136l,17179867136l,1073709056l,0l,0l,0l,0l,0l,0l,};
+public static final long[] ROOK_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,16138663936l,16138663936l,17179867136l,17179867136l,17179867136l,8589930496l,4294959104l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,4294959104l,8589930496l,8589930496l,8589930496l,8589930496l,68719476224l,68719476224l,68719476224l,0l,0l,0l,0l,0l,0l,};
+public static final long[] BISHOP_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,14680064l,14680064l,14680064l,14680064l,0l,14680064l,66584576l,133955584l,268304384l,532611072l,1069514752l,1069514752l,2143272960l,2143272960l,2143272960l,2147467264l,2147467264l,1073709056l,536805376l,133955584l,133955584l,536805376l,536805376l,536805376l,536805376l,1073709056l,268304384l,0l,0l,32505856l,68719476224l,274863226752l,0l,0l,0l,0l,0l,0l,0l,};
+public static final long[] KNIGHT_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,1064960l,3719168l,8372224l,134201344l,536854528l,1073733632l,4294914048l,8589905920l,8589907968l,17179868160l,17179868160l,34351349248l,34351349248l,68706893568l,68704796416l,68703747968l,137431089024l,137430695040l,137430630336l,137434791808l,137434772352l,137436860672l,137437904896l,137438429184l,274877644800l,274877644800l,274877775872l,274877841408l,274877841408l,274877841408l,137438887936l,0l,0l,0l,0l,0l,0l,};
+public static final long[] PAWN_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,6291456l,33030144l,33030144l,66846720l,66846720l,33030144l,33030144l,66846720l,134086656l,134086656l,268369920l,268369920l,268369920l,268369920l,268369920l,134086656l,66846720l,66846720l,268369920l,536838144l,1073725440l,2147475456l,2147475456l,4294963200l,4294963200l,4294963200l,8589932544l,8589932544l,8589932544l,8589932544l,0l,0l,0l,0l,0l,0l,};
+public static final long[] EMPTY_SPRITE = new long[SOURCE_SIZE];
+
+public static long[][] SPRITES = new long[][]{EMPTY_SPRITE,PAWN_SPRITE,KNIGHT_SPRITE,BISHOP_SPRITE,ROOK_SPRITE,QUEEN_SPRITE,KING_SPRITE};
 
 }

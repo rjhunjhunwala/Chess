@@ -224,6 +224,48 @@ public class ArtificialIntelligence {
 			});
 			menu.add(menuItem);
 			menuBar.add(menu);
+			menuItem = new JMenuItem("Toggle Graphics (Chess)");
+			menuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					GamePanel.useFancyGraphics = !GamePanel.useFancyGraphics;
+				}
+
+			});
+			menu.add(menuItem);
+			menuBar.add(menu);
+
+			menuItem = new JMenuItem("Increase Size");
+			menuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					GamePanel.SCALE += 10;
+					GamePanel.OFFSET = (int) (GamePanel.SCALE * .15);
+					GamePanel.TOKEN_SIZE = GamePanel.SCALE - GamePanel.OFFSET * 2;
+				g.pack();
+				}
+
+			});
+			menu.add(menuItem);
+			menuBar.add(menu);
+
+			menuItem = new JMenuItem("Decrease Size");
+			menuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					GamePanel.SCALE -= 10;
+					GamePanel.OFFSET = (int) (GamePanel.SCALE * .15);
+					GamePanel.TOKEN_SIZE = GamePanel.SCALE - GamePanel.OFFSET * 2;
+									g.pack();
+				}
+
+			});
+			menu.add(menuItem);
+			menuBar.add(menu);
+
 			return menuBar;
 		}
 
@@ -243,9 +285,9 @@ public class ArtificialIntelligence {
 
 	public static class GamePanel extends javax.swing.JPanel {
 
-		public static final int SCALE = 60;
-		public static final int OFFSET = (int) (SCALE * .15);
-		public static final int TOKEN_SIZE = SCALE - OFFSET * 2;
+		public static int SCALE = 90;
+		public static int OFFSET = (int) (SCALE * .15);
+		public static int TOKEN_SIZE = SCALE - OFFSET * 2;
 
 		public static int mouseDownLoc;
 
@@ -261,6 +303,10 @@ public class ArtificialIntelligence {
 		 * The color for the little details that go above the pieces
 		 */
 		public static final Color DETAIL_COLOR = Color.GREEN;
+		/**
+		 * Whether or not we using fancy or sample graphics.
+		 */
+		public static boolean useFancyGraphics = true;
 
 		GamePanel() {
 			this.addMouseListener(new MouseListener() {
@@ -348,6 +394,7 @@ public class ArtificialIntelligence {
 			if (mainBoard == null) {
 
 			} else {
+
 				for (int i = 0; i < getSIZE() * getSIZE(); i++) {
 					int x = i % getSIZE();
 					int y = i / getSIZE();
@@ -360,56 +407,72 @@ public class ArtificialIntelligence {
 						boolean isCompPiece = (tile & 8) != 0;
 						Color mainColor = isCompPiece ? BLACK_COLOR_AI : WHITE_COLOR_HUMAN;
 						Color opposingColor = !isCompPiece ? BLACK_COLOR_AI : WHITE_COLOR_HUMAN;
-
-						switch (tile & 7) {
-							case Chess.PAWN:
+						if (useFancyGraphics) {
+							xStart -= OFFSET;
+							yStart -= OFFSET;
+							if (tile != 0) {
 								g.setColor(mainColor);
-								g.fillOval(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, isCompPiece ? Math.PI / 2 : -Math.PI / 2);
-								break;
-							case Chess.KNIGHT:
-								g.setColor(mainColor);
-								g.fillRect(xStart + TOKEN_SIZE / 4, yStart, TOKEN_SIZE / 2, TOKEN_SIZE);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 3);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 3);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 6);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 6);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 2 * Math.PI / 3);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -2 * Math.PI / 3);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 5 * Math.PI / 6);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -5 * Math.PI / 6);
-								break;
-							case Chess.BISHOP:
-								g.setColor(mainColor);
-								g.fillOval(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 4);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 4);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 3 * Math.PI / 4);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -3 * Math.PI / 4);
-								break;
-							case Chess.ROOK:
-								g.setColor(mainColor);
-								g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 2);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 2);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 0);
-								drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI);
-								break;
-							case Chess.QUEEN:
-								g.setColor(mainColor);
-								g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
-								for (int d = 0; d < 8; d++) {
-									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, d * Math.PI / 4);
+								for (int j = 0; j < SCALE; j++) {
+									for (int k = 0; k < SCALE; k++) {
+										int xIndex = (int) (((((double) j)) / ((double) SCALE)) * Chess.SOURCE_SIZE);
+										int yIndex = (int) (((((double) k)) / ((double) SCALE)) * Chess.SOURCE_SIZE);
+										if (((Chess.SPRITES[tile&7][yIndex] & (((long) 1) << xIndex)) > 0)) {
+											g.drawRect(xStart + j, yStart + k, 1, 1);
+										}
+									}
 								}
-								break;
-							case Chess.KING:
-								g.setColor(mainColor);
-								g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
-								g.setColor(opposingColor);
-								g.fillOval(xStart + OFFSET, yStart + OFFSET, TOKEN_SIZE - OFFSET * 2, TOKEN_SIZE - OFFSET * 2);
-								for (int d = 0; d < 8; d++) {
-									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, d * Math.PI / 4);
-								}
+							}
+						} else {
+							switch (tile & 7) {
+								case Chess.PAWN:
+									g.setColor(mainColor);
+									g.fillOval(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, isCompPiece ? Math.PI / 2 : -Math.PI / 2);
+									break;
+								case Chess.KNIGHT:
+									g.setColor(mainColor);
+									g.fillRect(xStart + TOKEN_SIZE / 4, yStart, TOKEN_SIZE / 2, TOKEN_SIZE);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 3);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 3);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 6);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 6);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 2 * Math.PI / 3);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -2 * Math.PI / 3);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 5 * Math.PI / 6);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -5 * Math.PI / 6);
+									break;
+								case Chess.BISHOP:
+									g.setColor(mainColor);
+									g.fillOval(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 4);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 4);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 3 * Math.PI / 4);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -3 * Math.PI / 4);
+									break;
+								case Chess.ROOK:
+									g.setColor(mainColor);
+									g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI / 2);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, -Math.PI / 2);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, 0);
+									drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, Math.PI);
+									break;
+								case Chess.QUEEN:
+									g.setColor(mainColor);
+									g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
+									for (int d = 0; d < 8; d++) {
+										drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, d * Math.PI / 4);
+									}
+									break;
+								case Chess.KING:
+									g.setColor(mainColor);
+									g.fillRect(xStart, yStart, TOKEN_SIZE, TOKEN_SIZE);
+									g.setColor(opposingColor);
+									g.fillOval(xStart + OFFSET, yStart + OFFSET, TOKEN_SIZE - OFFSET * 2, TOKEN_SIZE - OFFSET * 2);
+									for (int d = 0; d < 8; d++) {
+										drawDetailLine(g, xStart + SCALE / 2 - OFFSET, yStart + SCALE / 2 - OFFSET, d * Math.PI / 4);
+									}
+							}
 						}
 					} else {
 						switch (tile) {
