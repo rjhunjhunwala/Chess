@@ -36,8 +36,8 @@ public class Chess extends GenericBoardGame {
 	 */
 	public static final int KNIGHT_VALUE = 300;
 	/**
-		* Base value of a pawn, later get's more points for being higher
-		*/
+	 * Base value of a pawn, later get's more points for being higher
+	 */
 	public static final int PAWN_VALUE = 70;
 
 	/**
@@ -77,6 +77,9 @@ public class Chess extends GenericBoardGame {
 		VALUES[QUEEN] = QUEEN_VALUE;
 		VALUES[KING] = KING_VALUE;
 	}
+	
+	public static final int[] PAWN_VALUE_TABLE = {0,30,40,50,70,150,350};
+	
 	//======End of Constants======
 
 	/**
@@ -155,38 +158,43 @@ public class Chess extends GenericBoardGame {
 	}
 
 	/**
-		* A heuristic way of evaluating a board
-		* First, we take the difference of the computers values and the opponents, 
-		* next, we add bonuses/penalties for center ownership and control
-		* @return the value of a board
-		*/
+	 * A heuristic way of evaluating a board First, we take the difference of the
+	 * computers values and the opponents, next, we add bonuses/penalties for
+	 * center ownership and control
+	 *
+	 * @return the value of a board
+	 */
 	@Override
 	public int getValue() {
 		int value = 0;
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
 			value += (2 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
-			
-			if((piece&7)==PAWN&&(piece&8)==8){
-				value+=((i>>3)*25);
+
+			if ((piece & 7) == PAWN) {
+				if ((piece & 8) == 8) {
+					value += PAWN_VALUE_TABLE[(i >> 3)];
+				} else {
+			value -= PAWN_VALUE_TABLE[(~(i >> 3))&7];
+				}
 			}
 		}
 		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (45);
 		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (45);
 		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (45);
 		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (45);
-		
-		for(int move:this.getPossibleMoves(true)){
-			int end = move>>6;
-			if(end==27||end==28||end==35||end==36){
-				value+=20;
+
+		for (int move : this.getPossibleMoves(true)) {
+			int end = move >> 6;
+			if (end == 27 || end == 28 || end == 35 || end == 36) {
+				value += 15;
 			}
 		}
-		
-				for(int move:this.getPossibleMoves(false)){
-			int end = move>>6;
-			if(end==27||end==28||end==35||end==36){
-				value-=20;
+
+		for (int move : this.getPossibleMoves(false)) {
+			int end = move >> 6;
+			if (end == 27 || end == 28 || end == 35 || end == 36) {
+				value -= 15;
 			}
 		}
 

@@ -133,7 +133,7 @@ public class ArtificialIntelligence {
 
 			if (mainBoard instanceof Chess) {
 				if (DEPTH > 7) {
-					DEPTH = 7;
+					DEPTH = DEPTH>12?9:7;
 				}
 			}
 			ArtificialIntelligence.DEPTH = DEPTH;
