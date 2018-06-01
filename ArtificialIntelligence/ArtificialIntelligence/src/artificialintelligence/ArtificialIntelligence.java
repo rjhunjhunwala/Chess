@@ -44,7 +44,7 @@ public class ArtificialIntelligence {
 	/**
 	 * The main board
 	 */
-	public static Board mainBoard = new BigOthello();
+	public static Board mainBoard = new Chess();
 	/**
 	 * The graphics display
 	 */

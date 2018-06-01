@@ -36,9 +36,9 @@ public class Chess extends GenericBoardGame {
 	 */
 	public static final int KNIGHT_VALUE = 300;
 	/**
-	 * Logically, a pawn is worth 100/100 pawns
-	 */
-	public static final int PAWN_VALUE = 100;
+		* Base value of a pawn, later get's more points for being higher
+		*/
+	public static final int PAWN_VALUE = 70;
 
 	/**
 	 * These constants are the constants used to represent pieces
@@ -166,6 +166,10 @@ public class Chess extends GenericBoardGame {
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
 			value += (2 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
+			
+			if((piece&7)==PAWN&&(piece&8)==8){
+				value+=((i>>3)*25);
+			}
 		}
 		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (45);
 		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (45);
