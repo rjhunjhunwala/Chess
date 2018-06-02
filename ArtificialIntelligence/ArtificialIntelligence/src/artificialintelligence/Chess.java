@@ -69,10 +69,20 @@ public class Chess extends GenericBoardGame {
 	public static final int BLACK = 1;
 
 	/**
+	 * Is unmoved bit location
+	 */
+	public static final int UNMOVED_BIT_INDEX = 4;
+
+	public static final int UNMOVED = 1;
+	public static final int MOVED = 0;
+	/**
+	 *
 	 * This array stores all the values for O(1) access
 	 */
 	public static final int[] VALUES = new int[7];
 
+
+	
 	static {
 		VALUES[EMPTY] = 0;
 		VALUES[PAWN] = PAWN_VALUE;
@@ -104,22 +114,22 @@ public class Chess extends GenericBoardGame {
 			Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
 			Chess.setTileAtSpot(state, 48 + i, PAWN);
 		}
-		Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3));
-		Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3));
+		Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3));
 		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3));
 		Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3));
 		Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3));
-		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3));
+		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3));
 
-		Chess.setTileAtSpot(state, 56, ROOK);
-		Chess.setTileAtSpot(state, 63, ROOK);
+		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4) );
 		Chess.setTileAtSpot(state, 57, KNIGHT);
 		Chess.setTileAtSpot(state, 62, KNIGHT);
 		Chess.setTileAtSpot(state, 58, BISHOP);
 		Chess.setTileAtSpot(state, 61, BISHOP);
-		Chess.setTileAtSpot(state, 60, KING);
+		Chess.setTileAtSpot(state, 60, KING+ (UNMOVED << 4) );
 		Chess.setTileAtSpot(state, 59, QUEEN);
 
 	}
@@ -185,28 +195,23 @@ public class Chess extends GenericBoardGame {
 		}
 		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (45);
 		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (45);
-		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (45);
-		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (45);
+		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (55);
+		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (55);
 
-		for (int move : this.getPossibleMoves(true)) {
-			int end = move >> 6;
-			if (end == 27 || end == 28 || end == 35 || end == 36) {
-				value += 15;
-			}
+
+		//incentivize castling
+		if(((getTileAtSpot(2)&7)==KING)&&((getTileAtSpot(3)&7)==ROOK)){
+	value+=90;
 		}
-
-		for (int move : this.getPossibleMoves(false)) {
-			int end = move >> 6;
-			if (end == 27 || end == 28 || end == 35 || end == 36) {
-				value -= 15;
-			}
+				if((getTileAtSpot(6)&7)==KING&&((getTileAtSpot(5)&7)==ROOK)){
+	value+=135;
 		}
 
 		return value;
 	}
 
 	/**
-	 * List of current rule simplifications NO Castling NO En Passant, NO
+	 * List of current rule simplifications NO En Passant, NO
 	 * under-promotion
 	 *
 	 * I apologize in advance for this absurd method. The repetition, is
@@ -217,6 +222,18 @@ public class Chess extends GenericBoardGame {
 	 */
 	@Override
 	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove) {
+		return getPossibleMoves(isComputerMove, true);
+	}
+
+	/**
+	 * I need a second version of this method to avoid an infinite loop when both
+	 * sides can castle
+	 *
+	 * @param isComputerMove
+	 * @param considerKing
+	 * @return
+	 */
+	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing) {
 		LinkedList<Integer> toRet = new LinkedList<>();
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
@@ -248,13 +265,15 @@ public class Chess extends GenericBoardGame {
 						if ((i & 7) > 0) {
 
 							int leftDiagonalCapture = getTileAtSpot(end - 1);
-							if (leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) {
+							//when checking for control of squares (for castling check), pretend pawns can diagonal move
+							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing) {
 								toRet.add(((end - 1) << 6) + i);
 							}
 						}
 						if ((i & 7) < 7) {
 							int leftDiagonalCapture = getTileAtSpot(end + 1);
-							if (leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) {
+							//same justification
+							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing) {
 								toRet.add(((end + 1) << 6) + i);
 							}
 						}
@@ -597,6 +616,9 @@ public class Chess extends GenericBoardGame {
 						}
 						break;
 					case KING:
+						if (!considerKing) {
+							break;
+						}
 						//once again, unfortunately, this is the best way to handle the king
 						x = i & 7;
 						y = i >> 3;
@@ -650,6 +672,83 @@ public class Chess extends GenericBoardGame {
 							}
 						}
 
+						//Wait... You're not done yet! Castling
+						//if the king is unmoved
+						if ((piece & 16) > 0) {
+							//if it's the computer's king
+							boolean inCheck = false;
+							LinkedList<Integer> opponentAttacks = this.getPossibleMoves(!isComputerMove, false);
+							int spotOfKing = 60 - 7 * side;
+							for (int someInt : opponentAttacks) {
+								if ((someInt >> 6) == spotOfKing) {
+									inCheck = true;
+									break;
+								}
+							}
+							if (!inCheck) {
+
+								if (side == 8) {
+									//if the queenside rook is unmoved
+									if ((getTileAtSpot(0) & 16) > 0&&getTileAtSpot(1)==0&&getTileAtSpot(2)==0&&getTileAtSpot(3)==0) {
+										inCheck = false;
+										//check castling queen
+										for (int someInt : opponentAttacks) {
+											if ((someInt >> 6) == 3) {
+												inCheck = true;
+												break;
+											}
+										}
+										if (!inCheck) {
+											toRet.add((1 << 12) + (2 << 6) + i);
+										}
+									}
+									if ((getTileAtSpot(7) & 16) > 0&&getTileAtSpot(5)==0&&getTileAtSpot(6)==0) {
+										//check castling king
+										for (int someInt : opponentAttacks) {
+																		inCheck = false;
+											if ((someInt >> 6) == 5) {
+												inCheck = true;
+												break;
+											}
+										}
+										if (!inCheck) {
+											toRet.add((1 << 12) + (6 << 6) + i);
+										}
+									}
+								} else /*Human castling*/ {
+									if ((getTileAtSpot(56) & 16) > 0&&getTileAtSpot(57)==0&&getTileAtSpot(58)==0&&getTileAtSpot(59)==0){			
+										inCheck = false;
+										//check castling queen
+										for (int someInt : opponentAttacks) {
+											if ((someInt >> 6) == 59) {
+												inCheck = true;
+												break;
+											}
+										}
+										if (!inCheck) {
+
+											toRet.add((1 << 12) + (58 << 6) + i);
+										}
+									}
+									if ((getTileAtSpot(63) & 16) > 0&&getTileAtSpot(62)==0&&getTileAtSpot(61)==0) {
+																	inCheck = false;
+										//check castling king
+										for (int someInt : opponentAttacks) {
+											if ((someInt >> 6) == 61) {
+												inCheck = true;
+												break;
+											}
+										}
+										if (!inCheck) {
+											//System.out.println("Can king Side Castle");
+											toRet.add((1 << 12) + (62 << 6) + i);
+											//System.out.println(toRet.getLast());
+										}
+									}
+								}
+							}//End in Check 
+						}//End castling
+
 						break;
 				}
 			}
@@ -671,16 +770,37 @@ public class Chess extends GenericBoardGame {
 	public Board makeMove(int move, boolean isComputerTurn) {
 		int tile = getTileAtSpot(move & 63);
 		int start = move & 63;
-		int end = move >> 6;
-		//	Sketchy pawn promotion hack
-		if ((tile & 7) == PAWN && ((end >> 3) == 0 || ((end >> 3) == 7))) {
-			tile += (QUEEN - PAWN);
-		}
+		int end = (move >> 6) & 63;
 		//"performance"
 		long[] newState = {state[0], state[1], state[2], state[3],
 			state[4], state[5], state[6], state[7]};
+		if ((move & (1 << 12)) > 0) {
+
+			switch (end) {
+				case 2:
+					Chess.setTileAtSpot(newState, 0, 0);
+					Chess.setTileAtSpot(newState, 3, ROOK + 24);
+					break;
+				case 6:
+					Chess.setTileAtSpot(newState, 7, 0);
+					Chess.setTileAtSpot(newState, 5, ROOK + 24);
+					break;
+				case 58:
+					Chess.setTileAtSpot(newState, 56, 0);
+					Chess.setTileAtSpot(newState, 59, ROOK + 16);
+					break;
+				case 62:
+					Chess.setTileAtSpot(newState, 63, 0);
+					Chess.setTileAtSpot(newState, 61, ROOK + 16);
+			}
+		} else {
+			//	Sketchy pawn promotion hack
+			if ((tile & 7) == PAWN && ((end >> 3) == 0 || ((end >> 3) == 7))) {
+				tile += (QUEEN - PAWN);
+			}
+		}
 		Chess.setTileAtSpot(newState, start, 0);
-		Chess.setTileAtSpot(newState, end, tile);
+		Chess.setTileAtSpot(newState, end, tile & 15);
 		return new Chess(newState);
 	}
 
@@ -712,14 +832,14 @@ public class Chess extends GenericBoardGame {
 	 * line of the image, and each bit in the long represents whether or not that
 	 * pixel is active...
 	 */
-public static final long[] KING_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,0l,4194304l,14680064l,32505856l,32505856l,15064897536l,68483612160l,137404612352l,274859556736l,274860081024l,549745328064l,549749522368l,274873712576l,274873712512l,137434759040l,68715282176l,34344009216l,16172988416l,1073725440l,4294963200l,4026593280l,2684325888l,2147475456l,4279234560l,3288084480l,1073725440l,2147475456l,268369920l,0l,0l,0l,0l,0l,0l,};
-public static final long[] QUEEN_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,14680064l,14704640l,3235966976l,3221250048l,0l,824633720928l,824633720928l,0l,4194304l,1077985280l,1616953344l,1625341952l,70613319936l,104973058816l,122153060096l,53567800832l,62175563264l,66537905664l,64961486336l,268304384l,34359737344l,34359737344l,17179867136l,0l,4294959104l,4294959104l,4228374528l,1073709056l,8589930496l,17179867136l,17179867136l,17179867136l,1073709056l,0l,0l,0l,0l,0l,0l,};
-public static final long[] ROOK_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,16138663936l,16138663936l,17179867136l,17179867136l,17179867136l,8589930496l,4294959104l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,2147467264l,4294959104l,8589930496l,8589930496l,8589930496l,8589930496l,68719476224l,68719476224l,68719476224l,0l,0l,0l,0l,0l,0l,};
-public static final long[] BISHOP_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,14680064l,14680064l,14680064l,14680064l,0l,14680064l,66584576l,133955584l,268304384l,532611072l,1069514752l,1069514752l,2143272960l,2143272960l,2143272960l,2147467264l,2147467264l,1073709056l,536805376l,133955584l,133955584l,536805376l,536805376l,536805376l,536805376l,1073709056l,268304384l,0l,0l,32505856l,68719476224l,274863226752l,0l,0l,0l,0l,0l,0l,0l,};
-public static final long[] KNIGHT_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,1064960l,3719168l,8372224l,134201344l,536854528l,1073733632l,4294914048l,8589905920l,8589907968l,17179868160l,17179868160l,34351349248l,34351349248l,68706893568l,68704796416l,68703747968l,137431089024l,137430695040l,137430630336l,137434791808l,137434772352l,137436860672l,137437904896l,137438429184l,274877644800l,274877644800l,274877775872l,274877841408l,274877841408l,274877841408l,137438887936l,0l,0l,0l,0l,0l,0l,};
-public static final long[] PAWN_SPRITE = new long[]{0l,0l,0l,0l,0l,0l,0l,0l,0l,6291456l,33030144l,33030144l,66846720l,66846720l,33030144l,33030144l,66846720l,134086656l,134086656l,268369920l,268369920l,268369920l,268369920l,268369920l,134086656l,66846720l,66846720l,268369920l,536838144l,1073725440l,2147475456l,2147475456l,4294963200l,4294963200l,4294963200l,8589932544l,8589932544l,8589932544l,8589932544l,0l,0l,0l,0l,0l,0l,};
-public static final long[] EMPTY_SPRITE = new long[SOURCE_SIZE];
+	public static final long[] KING_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 4194304l, 14680064l, 32505856l, 32505856l, 15064897536l, 68483612160l, 137404612352l, 274859556736l, 274860081024l, 549745328064l, 549749522368l, 274873712576l, 274873712512l, 137434759040l, 68715282176l, 34344009216l, 16172988416l, 1073725440l, 4294963200l, 4026593280l, 2684325888l, 2147475456l, 4279234560l, 3288084480l, 1073725440l, 2147475456l, 268369920l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] QUEEN_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 14680064l, 14704640l, 3235966976l, 3221250048l, 0l, 824633720928l, 824633720928l, 0l, 4194304l, 1077985280l, 1616953344l, 1625341952l, 70613319936l, 104973058816l, 122153060096l, 53567800832l, 62175563264l, 66537905664l, 64961486336l, 268304384l, 34359737344l, 34359737344l, 17179867136l, 0l, 4294959104l, 4294959104l, 4228374528l, 1073709056l, 8589930496l, 17179867136l, 17179867136l, 17179867136l, 1073709056l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] ROOK_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 16138663936l, 16138663936l, 17179867136l, 17179867136l, 17179867136l, 8589930496l, 4294959104l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 2147467264l, 4294959104l, 8589930496l, 8589930496l, 8589930496l, 8589930496l, 68719476224l, 68719476224l, 68719476224l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] BISHOP_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 14680064l, 14680064l, 14680064l, 14680064l, 0l, 14680064l, 66584576l, 133955584l, 268304384l, 532611072l, 1069514752l, 1069514752l, 2143272960l, 2143272960l, 2143272960l, 2147467264l, 2147467264l, 1073709056l, 536805376l, 133955584l, 133955584l, 536805376l, 536805376l, 536805376l, 536805376l, 1073709056l, 268304384l, 0l, 0l, 32505856l, 68719476224l, 274863226752l, 0l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] KNIGHT_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 1064960l, 3719168l, 8372224l, 134201344l, 536854528l, 1073733632l, 4294914048l, 8589905920l, 8589907968l, 17179868160l, 17179868160l, 34351349248l, 34351349248l, 68706893568l, 68704796416l, 68703747968l, 137431089024l, 137430695040l, 137430630336l, 137434791808l, 137434772352l, 137436860672l, 137437904896l, 137438429184l, 274877644800l, 274877644800l, 274877775872l, 274877841408l, 274877841408l, 274877841408l, 137438887936l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] PAWN_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 6291456l, 33030144l, 33030144l, 66846720l, 66846720l, 33030144l, 33030144l, 66846720l, 134086656l, 134086656l, 268369920l, 268369920l, 268369920l, 268369920l, 268369920l, 134086656l, 66846720l, 66846720l, 268369920l, 536838144l, 1073725440l, 2147475456l, 2147475456l, 4294963200l, 4294963200l, 4294963200l, 8589932544l, 8589932544l, 8589932544l, 8589932544l, 0l, 0l, 0l, 0l, 0l, 0l,};
+	public static final long[] EMPTY_SPRITE = new long[SOURCE_SIZE];
 
-public static long[][] SPRITES = new long[][]{EMPTY_SPRITE,PAWN_SPRITE,KNIGHT_SPRITE,BISHOP_SPRITE,ROOK_SPRITE,QUEEN_SPRITE,KING_SPRITE};
+	public static long[][] SPRITES = new long[][]{EMPTY_SPRITE, PAWN_SPRITE, KNIGHT_SPRITE, BISHOP_SPRITE, ROOK_SPRITE, QUEEN_SPRITE, KING_SPRITE};
 
 }

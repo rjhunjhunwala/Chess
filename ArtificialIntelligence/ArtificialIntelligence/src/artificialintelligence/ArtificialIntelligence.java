@@ -19,6 +19,7 @@ import javax.swing.*;
  */
 public class ArtificialIntelligence {
 
+		public static boolean unMoved = true;
 	/**
 	 * The size of the board
 	 */
@@ -76,6 +77,7 @@ public class ArtificialIntelligence {
 	 * set up game
 	 */
 	static void setUpNewGame(int gamePlayed) {
+		unMoved = true;
 		switch (gamePlayed) {
 			case 0:
 				mainBoard = new TicTacToeBoard(0);
@@ -106,7 +108,6 @@ public class ArtificialIntelligence {
 	 */
 	public static void makeComputerMove() {
 		if (mainBoard.isGameOver()) {
-			System.out.println(mainBoard.getValue());
 			System.out.println("GAME OVER!");
 			return;
 		} else if (mainBoard.getPossibleMoves(true).size() == 0) {
@@ -132,9 +133,14 @@ public class ArtificialIntelligence {
 			}
 
 			if (mainBoard instanceof Chess) {
-				if (DEPTH > 5) {
-					DEPTH = 5;
+		  if(unMoved){
+					//not an opening book, but a reasonable hardcoded opening
+				mainBoard = 	mainBoard.makeMove((21<<6)+6, true);
+					unMoved = false;
+					return;
 				}
+					DEPTH = DEPTH>8?5:4;
+			
 			}
 			ArtificialIntelligence.DEPTH = DEPTH;
 		}
@@ -145,6 +151,7 @@ public class ArtificialIntelligence {
 		if (bestMove != -1) {
 			mainBoard = mainBoard.makeMove(bestMove, true);
 		}
+
 		if (mainBoard.isGameOver()) {
 			System.out.println("GAME OVER!");
 			return;
@@ -244,7 +251,7 @@ public class ArtificialIntelligence {
 					GamePanel.SCALE += 10;
 					GamePanel.OFFSET = (int) (GamePanel.SCALE * .15);
 					GamePanel.TOKEN_SIZE = GamePanel.SCALE - GamePanel.OFFSET * 2;
-				g.pack();
+					g.pack();
 				}
 
 			});
@@ -259,7 +266,7 @@ public class ArtificialIntelligence {
 					GamePanel.SCALE -= 10;
 					GamePanel.OFFSET = (int) (GamePanel.SCALE * .15);
 					GamePanel.TOKEN_SIZE = GamePanel.SCALE - GamePanel.OFFSET * 2;
-									g.pack();
+					g.pack();
 				}
 
 			});
@@ -335,6 +342,7 @@ public class ArtificialIntelligence {
 					int y = e.getY();
 					x /= GamePanel.SCALE;
 					y /= GamePanel.SCALE;
+
 					int move = (((y << 3) + x) << 6) + mouseDownLoc;
 					if (mainBoard instanceof Chess) {
 						if (mainBoard.getPossibleMoves(false).contains(move)) {
@@ -350,7 +358,21 @@ public class ArtificialIntelligence {
 									ArtificialIntelligence.makeComputerMove();
 								}
 							}).start();
+						} else if (mainBoard.getPossibleMoves(false).contains(move+4096)) {
+							mainBoard = mainBoard.makeMove(move+4096, false);
+							g.repaint();
+							new Thread(new Runnable() {
+								public void run() {
+									try {
+										Thread.sleep(100);
+									} catch (Exception ex) {
+
+									}
+									ArtificialIntelligence.makeComputerMove();
+								}
+							}).start();
 						}
+
 					} else {
 						ArtificialIntelligence.makeComputerMove();
 					}
@@ -416,7 +438,7 @@ public class ArtificialIntelligence {
 									for (int k = 0; k < SCALE; k++) {
 										int xIndex = (int) (((((double) j)) / ((double) SCALE)) * Chess.SOURCE_SIZE);
 										int yIndex = (int) (((((double) k)) / ((double) SCALE)) * Chess.SOURCE_SIZE);
-										if (((Chess.SPRITES[tile&7][yIndex] & (((long) 1) << xIndex)) > 0)) {
+										if (((Chess.SPRITES[tile & 7][yIndex] & (((long) 1) << xIndex)) > 0)) {
 											g.drawRect(xStart + j, yStart + k, 1, 1);
 										}
 									}
