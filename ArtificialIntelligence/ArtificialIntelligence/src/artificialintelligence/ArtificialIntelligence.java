@@ -139,7 +139,7 @@ public class ArtificialIntelligence {
 					unMoved = false;
 					return;
 				}
-					DEPTH = DEPTH>8?5:4;
+					DEPTH = DEPTH>9?6:DEPTH>8?5:4;
 			
 			}
 			ArtificialIntelligence.DEPTH = DEPTH;

@@ -41,7 +41,7 @@ public class Chess extends GenericBoardGame {
 	 */
 	public static final int KNIGHT_VALUE = 300;
 	/**
-	 * Base value of a pawn, later get's more points for being higher
+	 * Base value of a pawn, later gets more points for being higher
 	 */
 	public static final int PAWN_VALUE = 70;
 
@@ -93,7 +93,7 @@ public class Chess extends GenericBoardGame {
 		VALUES[KING] = KING_VALUE;
 	}
 
-	public static final int[] PAWN_VALUE_TABLE = {0, 30, 40, 50, 70, 150, 350};
+	public static final int[] PAWN_VALUE_TABLE = {0, 30, 40, 50, 100, 130, 160};
 
 	//======End of Constants======
 	/**
@@ -131,6 +131,8 @@ public class Chess extends GenericBoardGame {
 		Chess.setTileAtSpot(state, 61, BISHOP);
 		Chess.setTileAtSpot(state, 60, KING+ (UNMOVED << 4) );
 		Chess.setTileAtSpot(state, 59, QUEEN);
+		
+	
 
 	}
 
@@ -193,10 +195,10 @@ public class Chess extends GenericBoardGame {
 				}
 			}
 		}
-		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (45);
-		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (45);
-		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (55);
-		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (55);
+		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
+		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
+		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
+		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
 
 
 		//incentivize castling
