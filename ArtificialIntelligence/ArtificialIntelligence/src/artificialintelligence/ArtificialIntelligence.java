@@ -345,8 +345,16 @@ public class ArtificialIntelligence {
 
 					int move = (((y << 3) + x) << 6) + mouseDownLoc;
 					if (mainBoard instanceof Chess) {
+						boolean wasPawnMoved = (((Chess) mainBoard).getTileAtSpot(mouseDownLoc)&7)==Chess.PAWN;
 						if (mainBoard.getPossibleMoves(false).contains(move)) {
 							mainBoard = mainBoard.makeMove(move, false);
+							if(((Chess) mainBoard).getTileAtSpot((y << 3) + x)==Chess.QUEEN){
+							if(wasPawnMoved){
+								System.out.println("Promoted");
+								
+							}
+						}
+							
 							g.repaint();
 							new Thread(new Runnable() {
 								public void run() {

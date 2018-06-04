@@ -26,20 +26,20 @@ public class Chess extends GenericBoardGame {
 	/**
 	 * The queen's value in centi-pawns
 	 */
-	public static final int QUEEN_VALUE = 910;
+	public static final int QUEEN_VALUE = 1180;
 	/**
 	 * The value of a rook
 	 */
-	public static final int ROOK_VALUE = 500;
+	public static final int ROOK_VALUE = 660;
 	/**
 	 * The Bishop's value, let us consider a bishop to be slightly better than a
 	 * knight
 	 */
-	public static final int BISHOP_VALUE = 330;
+	public static final int BISHOP_VALUE = 430;
 	/**
 	 * The knight's value
 	 */
-	public static final int KNIGHT_VALUE = 300;
+	public static final int KNIGHT_VALUE = 400;
 	/**
 	 * Base value of a pawn, later gets more points for being higher
 	 */
@@ -55,9 +55,16 @@ public class Chess extends GenericBoardGame {
 	public static final int ROOK = 4;
 	public static final int QUEEN = 5;
 	public static final int KING = 6;
+	/**
+	 * All right, this one deserves some justification... A "Ghost pawn, is the way
+	 * we'll handle en passant" For the turn after (and just the turn after) a pawn
+	 * moves up two, we leave a ghost pawn, in it's square That way, the board
+	 * knows that square is valid for an en-passant capture
+	 */
+	public static final int GHOST_PAWN = 1<<4;
 
 	/**
-	 * These values are miscelaneuous (spelled incorrectly) values of flag bits
+	 * These values are values of flag bits
 	 */
 	/**
 	 * The human is "white" even if they plays second
@@ -81,8 +88,6 @@ public class Chess extends GenericBoardGame {
 	 */
 	public static final int[] VALUES = new int[7];
 
-
-	
 	static {
 		VALUES[EMPTY] = 0;
 		VALUES[PAWN] = PAWN_VALUE;
@@ -124,15 +129,13 @@ public class Chess extends GenericBoardGame {
 		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3));
 
 		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4) );
+		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 57, KNIGHT);
 		Chess.setTileAtSpot(state, 62, KNIGHT);
 		Chess.setTileAtSpot(state, 58, BISHOP);
 		Chess.setTileAtSpot(state, 61, BISHOP);
-		Chess.setTileAtSpot(state, 60, KING+ (UNMOVED << 4) );
+		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 59, QUEEN);
-		
-	
 
 	}
 
@@ -160,7 +163,12 @@ public class Chess extends GenericBoardGame {
 
 	@Override
 	public int getTileAtSpot(int spot) {
-		return (int) (((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3));
+		return (int) ((((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3))&15);
+	}
+	
+
+	public int getTileAtSpotSpecial(int spot){
+		return (int) ((((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3)));
 	}
 
 	/**
@@ -200,21 +208,19 @@ public class Chess extends GenericBoardGame {
 		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
 		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
 
-
 		//incentivize castling
-		if(((getTileAtSpot(2)&7)==KING)&&((getTileAtSpot(3)&7)==ROOK)){
-	value+=90;
+		if (((getTileAtSpot(2) & 7) == KING) && ((getTileAtSpot(3) & 7) == ROOK)) {
+			value += 90;
 		}
-				if((getTileAtSpot(6)&7)==KING&&((getTileAtSpot(5)&7)==ROOK)){
-	value+=135;
+		if ((getTileAtSpot(6) & 7) == KING && ((getTileAtSpot(5) & 7) == ROOK)) {
+			value += 135;
 		}
 
 		return value;
 	}
 
 	/**
-	 * List of current rule simplifications NO En Passant, NO
-	 * under-promotion
+	 * List of current rule simplifications NO En Passant, NO under-promotion
 	 *
 	 * I apologize in advance for this absurd method. The repetition, is
 	 * technically for performance.
@@ -245,7 +251,7 @@ public class Chess extends GenericBoardGame {
 			if (((side = (piece & 8)) == 8) == (isComputerMove)) {
 				switch (piece & 7) {
 					case PAWN:
-						//Comouter pawn... can be double moved
+						//Computer pawn... can be double moved
 						if ((side == 8) && ((i >> 3) == 1)) {
 							if (getTileAtSpot(i + 8) == 0 && getTileAtSpot(i + 16) == 0) {
 								toRet.add(((i + 16) << 6) + i);
@@ -258,24 +264,27 @@ public class Chess extends GenericBoardGame {
 							}
 						}
 						int a = (side >> 2) - 1;
-						int end = i + (a * 8);
+						int end = i + (a << 3);
 
 						if (getTileAtSpot(end) == 0) {
 							toRet.add((end << 6) + i);
 						}
-
+int specialTarget;
 						if ((i & 7) > 0) {
 
 							int leftDiagonalCapture = getTileAtSpot(end - 1);
 							//when checking for control of squares (for castling check), pretend pawns can diagonal move
-							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing) {
+							//Also, allow pawns to capture en passant, yes I do know it's ugly
+							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing 
+															|| (((specialTarget=getTileAtSpotSpecial(end - 1))&GHOST_PAWN)!=0&&((side)!=((specialTarget&32)>>2)))) {
 								toRet.add(((end - 1) << 6) + i);
 							}
 						}
 						if ((i & 7) < 7) {
 							int leftDiagonalCapture = getTileAtSpot(end + 1);
 							//same justification
-							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing) {
+							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing
+															|| (((specialTarget=getTileAtSpotSpecial(end + 1))&GHOST_PAWN)!=0&&((side)!=((specialTarget&32)>>2)))) {
 								toRet.add(((end + 1) << 6) + i);
 							}
 						}
@@ -676,7 +685,7 @@ public class Chess extends GenericBoardGame {
 
 						//Wait... You're not done yet! Castling
 						//if the king is unmoved
-						if ((piece & 16) > 0) {
+						if ((getTileAtSpotSpecial(i) & 16) > 0) {
 							//if it's the computer's king
 							boolean inCheck = false;
 							LinkedList<Integer> opponentAttacks = this.getPossibleMoves(!isComputerMove, false);
@@ -691,7 +700,7 @@ public class Chess extends GenericBoardGame {
 
 								if (side == 8) {
 									//if the queenside rook is unmoved
-									if ((getTileAtSpot(0) & 16) > 0&&getTileAtSpot(1)==0&&getTileAtSpot(2)==0&&getTileAtSpot(3)==0) {
+									if ((getTileAtSpotSpecial(0) & 16) > 0 && getTileAtSpot(1) == 0 && getTileAtSpot(2) == 0 && getTileAtSpot(3) == 0) {
 										inCheck = false;
 										//check castling queen
 										for (int someInt : opponentAttacks) {
@@ -704,10 +713,10 @@ public class Chess extends GenericBoardGame {
 											toRet.add((1 << 12) + (2 << 6) + i);
 										}
 									}
-									if ((getTileAtSpot(7) & 16) > 0&&getTileAtSpot(5)==0&&getTileAtSpot(6)==0) {
+									if ((getTileAtSpotSpecial(7) & 16) > 0 && getTileAtSpot(5) == 0 && getTileAtSpot(6) == 0) {
 										//check castling king
 										for (int someInt : opponentAttacks) {
-																		inCheck = false;
+											inCheck = false;
 											if ((someInt >> 6) == 5) {
 												inCheck = true;
 												break;
@@ -718,7 +727,7 @@ public class Chess extends GenericBoardGame {
 										}
 									}
 								} else /*Human castling*/ {
-									if ((getTileAtSpot(56) & 16) > 0&&getTileAtSpot(57)==0&&getTileAtSpot(58)==0&&getTileAtSpot(59)==0){			
+									if ((getTileAtSpotSpecial(56) & 16) > 0 && getTileAtSpot(57) == 0 && getTileAtSpot(58) == 0 && getTileAtSpot(59) == 0) {
 										inCheck = false;
 										//check castling queen
 										for (int someInt : opponentAttacks) {
@@ -732,8 +741,8 @@ public class Chess extends GenericBoardGame {
 											toRet.add((1 << 12) + (58 << 6) + i);
 										}
 									}
-									if ((getTileAtSpot(63) & 16) > 0&&getTileAtSpot(62)==0&&getTileAtSpot(61)==0) {
-																	inCheck = false;
+									if ((getTileAtSpotSpecial(63) & 16) > 0 && getTileAtSpot(62) == 0 && getTileAtSpot(61) == 0) {
+										inCheck = false;
 										//check castling king
 										for (int someInt : opponentAttacks) {
 											if ((someInt >> 6) == 61) {
@@ -773,6 +782,7 @@ public class Chess extends GenericBoardGame {
 		int tile = getTileAtSpot(move & 63);
 		int start = move & 63;
 		int end = (move >> 6) & 63;
+		boolean cleanUpGhosts = true;
 		//"performance"
 		long[] newState = {state[0], state[1], state[2], state[3],
 			state[4], state[5], state[6], state[7]};
@@ -796,13 +806,43 @@ public class Chess extends GenericBoardGame {
 					Chess.setTileAtSpot(newState, 61, ROOK + 16);
 			}
 		} else {
-			//	Sketchy pawn promotion hack
-			if ((tile & 7) == PAWN && ((end >> 3) == 0 || ((end >> 3) == 7))) {
-				tile += (QUEEN - PAWN);
+
+			if ((tile & 7) == PAWN) {
+				//	Sketchy pawn promotion hack
+				if (((end >> 3) == 0 || ((end >> 3) == 7))) {
+					tile += (QUEEN - PAWN);
+				}
+				//double move pawn
+if(end - start == 16){
+	Chess.setTileAtSpot(newState, end - 8,  (1 << 5) + (GHOST_PAWN));
+	cleanUpGhosts = false;
+}else if(start - end == 16){
+	Chess.setTileAtSpot(newState, end + 8,  + (GHOST_PAWN));
+cleanUpGhosts = false;
+}
+int specialTile;
+if(((specialTile = getTileAtSpotSpecial(end))&31)==16){
+	int d = ((specialTile & 32) >> 4) - 1;
+//System.out.println(specialTile); 
+Chess.setTileAtSpot(newState, end + (d<<3), 0);
+}
+				//Start of sketchy en passant kludge
+						//end en passant kludge
+			
 			}
+
+	
 		}
+
 		Chess.setTileAtSpot(newState, start, 0);
 		Chess.setTileAtSpot(newState, end, tile & 15);
+		for(int i = 0;i<64;i++){
+	if((getTileAtSpotSpecial(i)&31)==16){
+		if(end != i){
+			Chess.setTileAtSpot(newState, i, 0);
+		}
+	}
+}
 		return new Chess(newState);
 	}
 
