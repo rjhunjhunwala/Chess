@@ -152,7 +152,7 @@ public class Chess extends GenericBoardGame {
 		state = inState;
 	}
 
-	private static void setTileAtSpot(long[] inState, int spot, int tile) {
+	public static void setTileAtSpot(long[] inState, int spot, int tile) {
 		inState[spot >> 3] = manipulateState(inState[spot >> 3], spot & 7, tile);
 	}
 

@@ -19,7 +19,7 @@ import javax.swing.*;
  */
 public class ArtificialIntelligence {
 
-		public static boolean unMoved = true;
+	public static boolean unMoved = true;
 	/**
 	 * The size of the board
 	 */
@@ -133,14 +133,14 @@ public class ArtificialIntelligence {
 			}
 
 			if (mainBoard instanceof Chess) {
-		  if(unMoved){
+				if (unMoved) {
 					//not an opening book, but a reasonable hardcoded opening
-				mainBoard = 	mainBoard.makeMove((21<<6)+6, true);
+					mainBoard = mainBoard.makeMove((21 << 6) + 6, true);
 					unMoved = false;
 					return;
 				}
-					DEPTH = DEPTH>9?6:DEPTH>8?5:4;
-			
+				DEPTH = DEPTH > 9 ? 6 : DEPTH > 8 ? 5 : 4;
+
 			}
 			ArtificialIntelligence.DEPTH = DEPTH;
 		}
@@ -345,16 +345,15 @@ public class ArtificialIntelligence {
 
 					int move = (((y << 3) + x) << 6) + mouseDownLoc;
 					if (mainBoard instanceof Chess) {
-						boolean wasPawnMoved = (((Chess) mainBoard).getTileAtSpot(mouseDownLoc)&7)==Chess.PAWN;
+						boolean wasPawnMoved = (((Chess) mainBoard).getTileAtSpot(mouseDownLoc) & 7) == Chess.PAWN;
 						if (mainBoard.getPossibleMoves(false).contains(move)) {
 							mainBoard = mainBoard.makeMove(move, false);
-							if(((Chess) mainBoard).getTileAtSpot((y << 3) + x)==Chess.QUEEN){
-							if(wasPawnMoved){
-								System.out.println("Promoted");
-								
+							if (((Chess) mainBoard).getTileAtSpot((y << 3) + x) == Chess.QUEEN) {
+								if (wasPawnMoved) {
+PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
+								}
 							}
-						}
-							
+
 							g.repaint();
 							new Thread(new Runnable() {
 								public void run() {
@@ -366,8 +365,8 @@ public class ArtificialIntelligence {
 									ArtificialIntelligence.makeComputerMove();
 								}
 							}).start();
-						} else if (mainBoard.getPossibleMoves(false).contains(move+4096)) {
-							mainBoard = mainBoard.makeMove(move+4096, false);
+						} else if (mainBoard.getPossibleMoves(false).contains(move + 4096)) {
+							mainBoard = mainBoard.makeMove(move + 4096, false);
 							g.repaint();
 							new Thread(new Runnable() {
 								public void run() {
@@ -519,6 +518,99 @@ public class ArtificialIntelligence {
 						}
 					}
 				}
+			}
+		}
+	}
+
+	public static class PawnPromotionFrame extends javax.swing.JFrame {
+
+		int spot = -1;
+		/**
+		 * Gotta love java naming conventions
+		 */
+		public static PawnPromotionFrame singletonPromotionFrame = null;
+		public static final int[] pieces = new int[]{Chess.QUEEN, Chess.KNIGHT, Chess.ROOK, Chess.BISHOP};
+
+		public PawnPromotionFrame(int spot) {
+			super("Pawn Promotion:");
+			this.spot = spot;
+			//bad practice, but I won't abuse this from another thread...
+			singletonPromotionFrame = this;
+			this.setVisible(true);
+			this.add(new PawnPromotionPanel());
+			this.pack();
+			this.setResizable(false);
+			this.setAlwaysOnTop(true);
+			this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			this.repaint();
+		}
+
+	}
+
+	public static class PawnPromotionPanel extends javax.swing.JPanel {
+
+		public PawnPromotionPanel() {
+ this.addMouseListener(new MouseListener(){
+
+		@Override
+		public void mouseClicked(MouseEvent e) {
+//nil
+		}
+
+		@Override
+		public void mousePressed(MouseEvent e) {
+    Chess.setTileAtSpot(((Chess) mainBoard).state,PawnPromotionFrame.singletonPromotionFrame.spot,PawnPromotionFrame.pieces[e.getX()/GamePanel.SCALE]);
+		  PawnPromotionFrame.singletonPromotionFrame.dispose();
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+//nil
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {
+			//nil
+		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {
+		//nil
+		}
+									
+	});
+ 		}
+
+		@Override
+		public Dimension getPreferredSize() {
+			return new Dimension(GamePanel.SCALE * PawnPromotionFrame.pieces.length, GamePanel.SCALE);
+		}
+
+		@Override
+		public void paintComponent(Graphics g) {
+			for (int i = 0; i < PawnPromotionFrame.pieces.length; i++) {
+				//branchless = fast, and "performance" really matters
+				int a = (((i & 1) << 8) - (i & 1));
+				System.out.println(a);
+				//that's the more fun way of saying, alternating between white and black, starting on white
+				System.out.println(a);
+				g.setColor(new Color(a, a, a));
+				g.fillRect(i * GamePanel.SCALE, 0, GamePanel.SCALE, GamePanel.SCALE);
+				a = 255 - a;
+
+				g.setColor(new Color(a, a, a));
+
+				for (int j = 0; j < GamePanel.SCALE; j++) {
+					for (int k = 0; k < GamePanel.SCALE; k++) {
+						int xIndex = (int) (((((double) j)) / ((double) GamePanel.SCALE)) * Chess.SOURCE_SIZE);
+						int yIndex = (int) (((((double) k)) / ((double) GamePanel.SCALE)) * Chess.SOURCE_SIZE);
+
+						if (((Chess.SPRITES[PawnPromotionFrame.pieces[i]][yIndex] & (((long) 1) << xIndex)) > 0)) {
+							g.drawRect(i * GamePanel.SCALE + j, k, 1, 1);
+						}
+					}
+				}
+
 			}
 		}
 	}
