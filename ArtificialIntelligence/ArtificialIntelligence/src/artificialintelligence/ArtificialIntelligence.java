@@ -112,10 +112,13 @@ public class ArtificialIntelligence {
 			return;
 		} else if (mainBoard.getPossibleMoves(true).size() == 0) {
 			//no moves... do nothing
+			System.out.println("No legal moves");
 			return;
 		} else if (mainBoard.getPossibleMoves(true).size() == 1) {
 			//only one move, don't over-think it
+			System.out.println("Forced move");
 			mainBoard = mainBoard.makeMove(mainBoard.getPossibleMoves(true).get(0), true);
+		return;
 		}
 
 		if (mainBoard instanceof TicTacToeBoard) {
@@ -138,16 +141,32 @@ public class ArtificialIntelligence {
 					mainBoard = mainBoard.makeMove((21 << 6) + 6, true);
 					unMoved = false;
 					return;
+					
 				}
-				DEPTH = DEPTH > 9 ? 6 : DEPTH > 8 ? 5 : 4;
+				
+				DEPTH = 4;
+							ArtificialIntelligence.DEPTH = DEPTH;
+		GameStateNode n = new GameStateNode(mainBoard, 0, true);
+Integer bestMove = n.getBestMove();
 
-			}
-			ArtificialIntelligence.DEPTH = DEPTH;
+Chess tempBoard = (Chess) (mainBoard.makeMove(bestMove, true));
+
+if(tempBoard.isInCheck(true)){
+ System.out.println(((Chess) mainBoard).isInCheck(true)?"Check-mate":"Stale-mate");
+	return;
+}
+		
+		
+		
 		}
-
+			ArtificialIntelligence.DEPTH = DEPTH;
 		GameStateNode n = new GameStateNode(mainBoard, 0, true);
 
 		Integer bestMove = n.getBestMove();
+		
+
+
+			
 		if (bestMove != -1) {
 			mainBoard = mainBoard.makeMove(bestMove, true);
 		}
@@ -157,8 +176,9 @@ public class ArtificialIntelligence {
 			return;
 		}
 
+	
+		}
 	}
-
 	/**
 	 * @param args the command line arguments
 	 */
@@ -346,26 +366,25 @@ public class ArtificialIntelligence {
 					int move = (((y << 3) + x) << 6) + mouseDownLoc;
 					if (mainBoard instanceof Chess) {
 						boolean wasPawnMoved = (((Chess) mainBoard).getTileAtSpot(mouseDownLoc) & 7) == Chess.PAWN;
-						if (mainBoard.getPossibleMoves(false).contains(move)) {
+						if (mainBoard.getPossibleMoves(false).contains(move) && !((Chess) mainBoard.makeMove(move, false)).isInCheck(false)) {
 							mainBoard = mainBoard.makeMove(move, false);
-							if (((Chess) mainBoard).getTileAtSpot((y << 3) + x) == Chess.QUEEN) {
-								if (wasPawnMoved) {
-PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
-								}
-							}
-
 							g.repaint();
-							new Thread(new Runnable() {
-								public void run() {
-									try {
-										Thread.sleep(100);
-									} catch (Exception ex) {
 
+							if (((Chess) mainBoard).getTileAtSpot((y << 3) + x) == Chess.QUEEN && wasPawnMoved) {
+								PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
+							} else {
+								new Thread(new Runnable() {
+									public void run() {
+										try {
+											Thread.sleep(100);
+										} catch (Exception ex) {
+
+										}
+										ArtificialIntelligence.makeComputerMove();
 									}
-									ArtificialIntelligence.makeComputerMove();
-								}
-							}).start();
-						} else if (mainBoard.getPossibleMoves(false).contains(move + 4096)) {
+								}).start();
+							}
+						} else if (mainBoard.getPossibleMoves(false).contains(move + 4096)&& !((Chess) mainBoard.makeMove(move, false)).isInCheck(false)) {
 							mainBoard = mainBoard.makeMove(move + 4096, false);
 							g.repaint();
 							new Thread(new Runnable() {
@@ -550,36 +569,37 @@ PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
 	public static class PawnPromotionPanel extends javax.swing.JPanel {
 
 		public PawnPromotionPanel() {
- this.addMouseListener(new MouseListener(){
+			this.addMouseListener(new MouseListener() {
 
-		@Override
-		public void mouseClicked(MouseEvent e) {
+				@Override
+				public void mouseClicked(MouseEvent e) {
 //nil
-		}
+				}
 
-		@Override
-		public void mousePressed(MouseEvent e) {
-    Chess.setTileAtSpot(((Chess) mainBoard).state,PawnPromotionFrame.singletonPromotionFrame.spot,PawnPromotionFrame.pieces[e.getX()/GamePanel.SCALE]);
-		  PawnPromotionFrame.singletonPromotionFrame.dispose();
-		}
+				@Override
+				public void mousePressed(MouseEvent e) {
+					Chess.setTileAtSpot(((Chess) mainBoard).state, PawnPromotionFrame.singletonPromotionFrame.spot, PawnPromotionFrame.pieces[e.getX() / GamePanel.SCALE]);
+					PawnPromotionFrame.singletonPromotionFrame.dispose();
+					ArtificialIntelligence.makeComputerMove();
+				}
 
-		@Override
-		public void mouseReleased(MouseEvent e) {
+				@Override
+				public void mouseReleased(MouseEvent e) {
 //nil
-		}
+				}
 
-		@Override
-		public void mouseEntered(MouseEvent e) {
-			//nil
-		}
+				@Override
+				public void mouseEntered(MouseEvent e) {
+					//nil
+				}
 
-		@Override
-		public void mouseExited(MouseEvent e) {
-		//nil
+				@Override
+				public void mouseExited(MouseEvent e) {
+					//nil
+				}
+
+			});
 		}
-									
-	});
- 		}
 
 		@Override
 		public Dimension getPreferredSize() {
@@ -591,9 +611,7 @@ PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
 			for (int i = 0; i < PawnPromotionFrame.pieces.length; i++) {
 				//branchless = fast, and "performance" really matters
 				int a = (((i & 1) << 8) - (i & 1));
-				System.out.println(a);
 				//that's the more fun way of saying, alternating between white and black, starting on white
-				System.out.println(a);
 				g.setColor(new Color(a, a, a));
 				g.fillRect(i * GamePanel.SCALE, 0, GamePanel.SCALE, GamePanel.SCALE);
 				a = 255 - a;
@@ -615,4 +633,4 @@ PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
 		}
 	}
 
-}
+} 

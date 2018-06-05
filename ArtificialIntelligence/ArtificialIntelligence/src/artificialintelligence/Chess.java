@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
@@ -61,7 +62,7 @@ public class Chess extends GenericBoardGame {
 	 * moves up two, we leave a ghost pawn, in it's square That way, the board
 	 * knows that square is valid for an en-passant capture
 	 */
-	public static final int GHOST_PAWN = 1<<4;
+	public static final int GHOST_PAWN = 1 << 4;
 
 	/**
 	 * These values are values of flag bits
@@ -116,31 +117,49 @@ public class Chess extends GenericBoardGame {
 	public Chess() {
 		state = new long[8];
 		for (int i = 0; i < 8; i++) {
-			Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
-			Chess.setTileAtSpot(state, 48 + i, PAWN);
+		Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
+		Chess.setTileAtSpot(state, 48 + i, PAWN);
 		}
-		Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3));
-		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3));
-		Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3));
-		Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3));
-		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3) + (UNMOVED << 4));
+Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3));
+	Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3));
+	Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3));
+	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3));
+	Chess.setTileAtSpot(state, 4, KING + (BLACK << 3)+(UNMOVED << 4));
 		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3));
 
-		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 57, KNIGHT);
-		Chess.setTileAtSpot(state, 62, KNIGHT);
+	Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 57, KNIGHT);
+	Chess.setTileAtSpot(state, 62, KNIGHT);
 		Chess.setTileAtSpot(state, 58, BISHOP);
-		Chess.setTileAtSpot(state, 61, BISHOP);
+	Chess.setTileAtSpot(state, 61, BISHOP);
 		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 59, QUEEN);
 
 	}
 
+	@Override
 	public int getSize() {
 		return 8;
+	}
+
+	public boolean isInCheck(boolean isAgainstComputerPlayer) {
+		int kingLoc = -1;
+		for (int i = 0; i < 64; i++) {
+			if (getTileAtSpot(i) == ((isAgainstComputerPlayer ? 1 : 0) << 3) + KING) {
+				kingLoc = i;
+				break;
+			}
+		}
+
+	for (int a : this.getPossibleMoves(!isAgainstComputerPlayer, true, true)) {
+			if (a >> 6 == kingLoc) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -163,11 +182,10 @@ public class Chess extends GenericBoardGame {
 
 	@Override
 	public int getTileAtSpot(int spot) {
-		return (int) ((((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3))&15);
+		return (int) ((((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3)) & 15);
 	}
-	
 
-	public int getTileAtSpotSpecial(int spot){
+	public int getTileAtSpotSpecial(int spot) {
 		return (int) ((((state[spot >> 3]) & ((long) 255 << ((spot & 7) << 3))) >> ((spot & 7) << 3)));
 	}
 
@@ -190,11 +208,21 @@ public class Chess extends GenericBoardGame {
 	 */
 	@Override
 	public int getValue() {
+//		if(isInCheck(true)){
+//			if(getPossibleMoves(true).isEmpty()){
+//				return -2 * VALUES[KING];
+//			}
+//		}
+//				if(isInCheck(false)){
+//			if(getPossibleMoves(false).isEmpty()){
+//				return 2 * VALUES[KING];
+//			}
+//		}
 		int value = 0;
 		for (int i = 0; i < 64; i++) {
-			int piece = getTileAtSpot(i);
+			int piece = getTileAtSpotSpecial(i);
 			value += (2 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
-
+			value += (2 * (((piece & 8) >> 2) - 1)) * (piece & 16);
 			if ((piece & 7) == PAWN) {
 				if ((piece & 8) == 8) {
 					value += PAWN_VALUE_TABLE[(i >> 3)];
@@ -229,8 +257,8 @@ public class Chess extends GenericBoardGame {
 	 * @return
 	 */
 	@Override
-	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove) {
-		return getPossibleMoves(isComputerMove, true);
+	public List<Integer> getPossibleMoves(boolean isComputerMove) {
+		return getPossibleMoves(isComputerMove, true, true);
 	}
 
 	/**
@@ -239,9 +267,10 @@ public class Chess extends GenericBoardGame {
 	 *
 	 * @param isComputerMove
 	 * @param considerKing
+	 * @param shouldIgnoreChecks
 	 * @return
 	 */
-	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing) {
+	public List<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing, boolean shouldIgnoreChecks) {
 		LinkedList<Integer> toRet = new LinkedList<>();
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
@@ -269,14 +298,14 @@ public class Chess extends GenericBoardGame {
 						if (getTileAtSpot(end) == 0) {
 							toRet.add((end << 6) + i);
 						}
-int specialTarget;
+						int specialTarget;
 						if ((i & 7) > 0) {
 
 							int leftDiagonalCapture = getTileAtSpot(end - 1);
 							//when checking for control of squares (for castling check), pretend pawns can diagonal move
 							//Also, allow pawns to capture en passant, yes I do know it's ugly
-							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing 
-															|| (((specialTarget=getTileAtSpotSpecial(end - 1))&GHOST_PAWN)!=0&&((side)!=((specialTarget&32)>>2)))) {
+							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing
+															|| (((specialTarget = getTileAtSpotSpecial(end - 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
 								toRet.add(((end - 1) << 6) + i);
 							}
 						}
@@ -284,7 +313,7 @@ int specialTarget;
 							int leftDiagonalCapture = getTileAtSpot(end + 1);
 							//same justification
 							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing
-															|| (((specialTarget=getTileAtSpotSpecial(end + 1))&GHOST_PAWN)!=0&&((side)!=((specialTarget&32)>>2)))) {
+															|| (((specialTarget = getTileAtSpotSpecial(end + 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
 								toRet.add(((end + 1) << 6) + i);
 							}
 						}
@@ -688,7 +717,7 @@ int specialTarget;
 						if ((getTileAtSpotSpecial(i) & 16) > 0) {
 							//if it's the computer's king
 							boolean inCheck = false;
-							LinkedList<Integer> opponentAttacks = this.getPossibleMoves(!isComputerMove, false);
+							List<Integer> opponentAttacks = this.getPossibleMoves(!isComputerMove, false, true);
 							int spotOfKing = 60 - 7 * side;
 							for (int someInt : opponentAttacks) {
 								if ((someInt >> 6) == spotOfKing) {
@@ -766,7 +795,17 @@ int specialTarget;
 
 		}
 
-		return toRet;
+		if (!shouldIgnoreChecks) {
+			ArrayList<Integer> toRetReal = new ArrayList<>(toRet.size());
+			for (int a : toRet) {
+				if (!((Chess) this.makeMove(a, isComputerMove)).isInCheck(isComputerMove)) {
+					toRetReal.add(a);
+				}
+			}
+			return toRetReal;
+		} else {
+			return toRet;
+		}
 	}
 
 	/**
@@ -813,36 +852,36 @@ int specialTarget;
 					tile += (QUEEN - PAWN);
 				}
 				//double move pawn
-if(end - start == 16){
-	Chess.setTileAtSpot(newState, end - 8,  (1 << 5) + (GHOST_PAWN));
-	cleanUpGhosts = false;
-}else if(start - end == 16){
-	Chess.setTileAtSpot(newState, end + 8,  + (GHOST_PAWN));
-cleanUpGhosts = false;
-}
-int specialTile;
-if(((specialTile = getTileAtSpotSpecial(end))&31)==16){
-	int d = ((specialTile & 32) >> 4) - 1;
+
+				//en passant hacks
+				if (end - start == 16) {
+					Chess.setTileAtSpot(newState, end - 8, (1 << 5) + (GHOST_PAWN));
+					cleanUpGhosts = false;
+				} else if (start - end == 16) {
+					Chess.setTileAtSpot(newState, end + 8, +(GHOST_PAWN));
+					cleanUpGhosts = false;
+				}
+//ending en passant hacks
+				int specialTile;
+				if (((specialTile = getTileAtSpotSpecial(end)) & 31) == 16) {
+					int d = ((specialTile & 32) >> 4) - 1;
 //System.out.println(specialTile); 
-Chess.setTileAtSpot(newState, end + (d<<3), 0);
-}
-				//Start of sketchy en passant kludge
-						//end en passant kludge
-			
+					Chess.setTileAtSpot(newState, end + (d << 3), 0);
+				}
+
 			}
 
-	
 		}
 
 		Chess.setTileAtSpot(newState, start, 0);
 		Chess.setTileAtSpot(newState, end, tile & 15);
-		for(int i = 0;i<64;i++){
-	if((getTileAtSpotSpecial(i)&31)==16){
-		if(end != i){
-			Chess.setTileAtSpot(newState, i, 0);
+		for (int i = 0; i < 64; i++) {
+			if ((getTileAtSpotSpecial(i) & 31) == 16) {
+				if (end != i) {
+					Chess.setTileAtSpot(newState, i, 0);
+				}
+			}
 		}
-	}
-}
 		return new Chess(newState);
 	}
 

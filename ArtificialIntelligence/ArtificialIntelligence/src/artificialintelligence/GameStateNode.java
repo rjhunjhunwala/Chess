@@ -1,4 +1,3 @@
-
 package artificialintelligence;
 
 import java.util.ArrayList;
@@ -6,24 +5,25 @@ import java.util.List;
 
 /**
  * One single node in the tree
+ *
  * @author rohan
  */
 public class GameStateNode {
 
-/**
-	* The current state
-	*/
+	/**
+	 * The current state
+	 */
 	private Board state;
 //how far down the tree we are
 	private int depth = 0;
 	/**
-		* Whether or not it's the computers turn
-		*/
+	 * Whether or not it's the computers turn
+	 */
 	private boolean isComputerTurn;
 
 	/**
-		* The nodes that can be reached from this node
-		*/
+	 * The nodes that can be reached from this node
+	 */
 	private ArrayList<GameStateNode> children;
 
 	/**
@@ -66,19 +66,19 @@ public class GameStateNode {
 				bestValue = value;
 				index = i;
 			}
-		i++;
+			i++;
 		}
-		if(state.getPossibleMoves(isComputerTurn).isEmpty()){
+		if (state.getPossibleMoves(isComputerTurn).isEmpty()) {
 			return -1;
-		}else{
-		return state.getPossibleMoves(isComputerTurn).get(index);
+		} else {
+			return state.getPossibleMoves(isComputerTurn).get(index);
 		}
-		}
+	}
 
 	/**
 	 * Get's the expected "value" of the board for a given move by recursively
 	 * going down the tree. The value of a node with children, is defined in one of
-	 * two ways... The worst child when it's the computers turn, and the worst when
+	 * two ways... The best child when it's the computers turn, and the worst when
 	 * it's the humans choice (assume perfect play) The value of a terminal node
 	 * (without children, either due to depth restrictions or just no moves left)
 	 * is determined by just it's current state
@@ -90,15 +90,43 @@ public class GameStateNode {
 		if (children != null && !children.isEmpty()) {
 			if (isComputerTurn) {
 				//the computer can choose which of the paths it take, so logically the value of this node will be the best
-				return getBestChild();
+				int value = getBestChild();
+				if (state instanceof Chess) {
+					if (value < -Chess.KING_VALUE / 2) {
+						boolean willLose = true;
+						for (GameStateNode g : children) {
+							if (g.getValue() > -Chess.KING_VALUE / 2) {
+								willLose = false;
+							}
+						}
+						if (willLose) {
+							value =  ((Chess) state).isInCheck(true) ? -Chess.KING_VALUE : 0;
+						}
+					}
+				}
+				return value;
 			} else {
 				//Assume perfect play from opponents (somewhat flawed, but let's go with it)
-				return getWorstChild();
+				int value = getWorstChild();
+				if (state instanceof Chess) {
+					if (value > Chess.KING_VALUE / 2) {
+						boolean willLose = true;
+						for (GameStateNode g : children) {
+							if (g.getValue() < Chess.KING_VALUE / 2) {
+								willLose = false;
+							}
+						}
+						if (willLose) {
+							return ((Chess) state).isInCheck(false) ? Chess.KING_VALUE : 0;
+						}
+					}
+				}
+				return value;
 			}
 		} else {
 			//perhaps quiescience search, but I'm not exactly competent...
 			//just don't go further down the tree and call it a day...
-			return state.getValue()<<6+depth;
+			return state.getValue();
 		}
 	}
 
