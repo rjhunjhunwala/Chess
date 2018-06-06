@@ -31,7 +31,7 @@ public class TicTacToeBoard extends GenericBoardGame {
 	public static void displayBoard() {
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
-				int tile = ((TicTacToeBoard) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 3 + j);
+				int tile = ((TicTacToeBoard) ArtificialIntelligence.getMainBoard()).getTileAtSpot(i * 3 + j);
 				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
 			}
 			System.out.println();
@@ -52,12 +52,12 @@ public class TicTacToeBoard extends GenericBoardGame {
 	 * As expected, plays tic tac toe
 	 */
 	public static void playTicTacToe() {
-		ArtificialIntelligence.mainBoard = new TicTacToeBoard(0);
+		ArtificialIntelligence.setMainBoard(new TicTacToeBoard(0));
 		while (true) {
 			displayBoard();
 			ArtificialIntelligence.makeComputerMove();
 			displayBoard();
-			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove(new java.util.Scanner(System.in).nextInt(), false);
+			ArtificialIntelligence.setMainBoard(ArtificialIntelligence.getMainBoard().makeMove(new java.util.Scanner(System.in).nextInt(), false));
 		}
 	}
 

@@ -122,21 +122,21 @@ public class Chess extends GenericBoardGame {
 		}
 Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
 	Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3));
-	Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3));
-	Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3));
-	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3));
+	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3)+ (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3)+ (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3)+ (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3)+ (UNMOVED << 4));
 	Chess.setTileAtSpot(state, 4, KING + (BLACK << 3)+(UNMOVED << 4));
-		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3));
+		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3)+ (UNMOVED << 4));
 
 	Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
 	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 57, KNIGHT);
-	Chess.setTileAtSpot(state, 62, KNIGHT);
-		Chess.setTileAtSpot(state, 58, BISHOP);
-	Chess.setTileAtSpot(state, 61, BISHOP);
+	Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 62, KNIGHT+ (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 61, BISHOP+ (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 59, QUEEN);
+		Chess.setTileAtSpot(state, 59, QUEEN+ (UNMOVED << 4));
 
 	}
 
@@ -221,8 +221,24 @@ Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
 		int value = 0;
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpotSpecial(i);
+		//encourage owning material
 			value += (2 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
-			value += (2 * (((piece & 8) >> 2) - 1)) * (piece & 16);
+	 
+			if((piece&7)==KING||(piece&7)==ROOK){		
+			//encourage not moving the king or rook... heavily
+				value += (((((piece & 8) >> 2) - 1)) * (piece & 16))<<2;
+		}
+		
+if(((i>>3)>0&&(piece&8)==8)&&((piece&7)==BISHOP||(piece&7)==KNIGHT)){
+	//lightly encourage piece developement
+				value += 32;
+}
+if(((i>>3)<7&&(piece&8)==0)&&((piece&7)==BISHOP||(piece&7)==KNIGHT)){
+	//lightly discourage hostile developement
+				value -= 32;
+}
+
+//lightly encourage moving pawns up the board, and discourage enemy advancement
 			if ((piece & 7) == PAWN) {
 				if ((piece & 8) == 8) {
 					value += PAWN_VALUE_TABLE[(i >> 3)];
@@ -231,10 +247,11 @@ Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
 				}
 			}
 		}
-		value += (2 * (((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
-		value += (2 * (((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
-		value += (2 * (((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
-		value += (2 * (((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
+		//encourage owning a spot in the center
+		value += ((((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
+		value += ((((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
+		value += ((((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
+		value += ((((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
 
 		//incentivize castling
 		if (((getTileAtSpot(2) & 7) == KING) && ((getTileAtSpot(3) & 7) == ROOK)) {

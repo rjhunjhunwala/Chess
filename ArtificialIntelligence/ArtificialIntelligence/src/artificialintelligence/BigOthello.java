@@ -36,7 +36,7 @@ public class BigOthello extends GenericBoardGame {
 	public static void displayBoard() {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				long tile = ((BigOthello) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 8 + j);
+				long tile = ((BigOthello) ArtificialIntelligence.getMainBoard()).getTileAtSpot(i * 8 + j);
 				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
 			}
 			System.out.println();

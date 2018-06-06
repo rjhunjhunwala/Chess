@@ -33,7 +33,7 @@ public class DallBallBoard extends GenericBoardGame {
 	public static void displayBoard() {
 		for (int i = 0; i < 4; i++) {
 			for (int j = 0; j < 4; j++) {
-				int tile = ((DallBallBoard) ArtificialIntelligence.mainBoard).getTileAtSpot(i * 4 + j);
+				int tile = ((DallBallBoard) ArtificialIntelligence.getMainBoard()).getTileAtSpot(i * 4 + j);
 				System.out.print(tile == EMPTY ? "_" : tile == X_TILE ? "X" : "O");
 			}
 			System.out.println();
@@ -54,18 +54,18 @@ public class DallBallBoard extends GenericBoardGame {
 	 * As expected, plays tic tac toe
 	 */
 	public static void playTicTacToe() {
-		ArtificialIntelligence.mainBoard = new DallBallBoard(0);
+		ArtificialIntelligence.setMainBoard(new DallBallBoard(0));
 
 		
 		while (true) {
 			displayBoard();
 			System.out.println("----");
-			System.out.println(ArtificialIntelligence.mainBoard.getValue());
+			System.out.println(ArtificialIntelligence.getMainBoard().getValue());
 			System.out.println("----");
-			ArtificialIntelligence.mainBoard = ArtificialIntelligence.mainBoard.makeMove((new java.util.Scanner(System.in).nextInt()), false);
+			ArtificialIntelligence.setMainBoard(ArtificialIntelligence.getMainBoard().makeMove(new java.util.Scanner(System.in).nextInt(), false));
 			displayBoard();
 			System.out.println("----");
-			System.out.println(ArtificialIntelligence.mainBoard.getValue());
+			System.out.println(ArtificialIntelligence.getMainBoard().getValue());
 			System.out.println("----");
 			ArtificialIntelligence.makeComputerMove();
 		}

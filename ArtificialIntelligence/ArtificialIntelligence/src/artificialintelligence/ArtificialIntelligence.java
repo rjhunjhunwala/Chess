@@ -1,13 +1,18 @@
 package artificialintelligence;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
@@ -18,6 +23,28 @@ import javax.swing.*;
  * @author rohan
  */
 public class ArtificialIntelligence {
+
+	public static final AtomicBoolean computerIsThinking = new AtomicBoolean(false);
+
+	/**
+	 * @return the mainBoard
+	 */
+	public static Board getMainBoard() {
+		return boards.getLast();
+	}
+
+	/**
+	 * @param aMainBoard the mainBoard to set
+	 */
+	public static void setMainBoard(Board aMainBoard) {
+		boards.add(aMainBoard);
+	}
+
+	private static LinkedList<Board> boards = new LinkedList<>();
+
+	static {
+		setMainBoard(new Chess());
+	}
 
 	public static boolean unMoved = true;
 	/**
@@ -42,10 +69,7 @@ public class ArtificialIntelligence {
 	 * Maximum depth for brute force search
 	 */
 	public static int DEPTH = 5;
-	/**
-	 * The main board
-	 */
-	public static Board mainBoard = new Chess();
+
 	/**
 	 * The graphics display
 	 */
@@ -63,7 +87,10 @@ public class ArtificialIntelligence {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			humanPlaysFirst = humanWillPlayFirst;
+			boards = new LinkedList<>();
 			setUpNewGame(game);
+
 			g.dispose();
 			g = new GameFrame();
 			if (!humanPlaysFirst) {
@@ -80,25 +107,25 @@ public class ArtificialIntelligence {
 		unMoved = true;
 		switch (gamePlayed) {
 			case 0:
-				mainBoard = new TicTacToeBoard(0);
+				setMainBoard(new TicTacToeBoard(0));
 				setSIZE(3);
 				break;
 			case 1:
-				mainBoard = new DallBallBoard(0);
+				setMainBoard(new DallBallBoard(0));
 				setSIZE(4);
 				break;
 			case 2:
 				//	mainBoard = new Othello(Othello.STARTING_VALUE);
-				mainBoard = new Othello(Math.random() < .5 ? Othello.STARTING_VALUE : Othello.ALT_STARTING_VALUE);
+				setMainBoard(new Othello(Math.random() < .5 ? Othello.STARTING_VALUE : Othello.ALT_STARTING_VALUE));
 				setSIZE(5);
 				break;
 			case 3:
 			default:
-				mainBoard = new BigOthello();
+				setMainBoard(new BigOthello());
 				setSIZE(8);
 				break;
 			case 4:
-				mainBoard = new Chess();
+				setMainBoard(new Chess());
 				setSIZE(8);
 		}
 	}
@@ -107,78 +134,78 @@ public class ArtificialIntelligence {
 	 * Let the ai make it's move
 	 */
 	public static void makeComputerMove() {
-		if (mainBoard.isGameOver()) {
-			System.out.println("GAME OVER!");
-			return;
-		} else if (mainBoard.getPossibleMoves(true).size() == 0) {
-			//no moves... do nothing
-			System.out.println("No legal moves");
-			return;
-		} else if (mainBoard.getPossibleMoves(true).size() == 1) {
-			//only one move, don't over-think it
-			System.out.println("Forced move");
-			mainBoard = mainBoard.makeMove(mainBoard.getPossibleMoves(true).get(0), true);
-		return;
-		}
-
-		if (mainBoard instanceof TicTacToeBoard) {
-			DEPTH = 10;
-		} else {
-			//create the depth by limiting us to searching through a max number of possibilties
-			//positions
-			int DEPTH = (int) (Math.log(10000000.0) / Math.log(mainBoard.getPossibleMoves(true).size() + 1) - 1);
-
-			if (mainBoard instanceof BigOthello) {
-				DEPTH -= 1;
-				if (DEPTH > 8) {
-					DEPTH = 8;
-				}
+		ArtificialIntelligence.computerIsThinking.set(true);
+		try {
+			if (getMainBoard().isGameOver()) {
+				System.out.println("GAME OVER!");
+				return;
+			} else if (getMainBoard().getPossibleMoves(true).size() == 0) {
+				//no moves... do nothing
+				System.out.println("No legal moves");
+				return;
+			} else if (getMainBoard().getPossibleMoves(true).size() == 1) {
+				//only one move, don't over-think it
+				System.out.println("Forced move");
+				setMainBoard(getMainBoard().makeMove(getMainBoard().getPossibleMoves(true).get(0), true));
+				return;
 			}
 
-			if (mainBoard instanceof Chess) {
-				if (unMoved) {
-					//not an opening book, but a reasonable hardcoded opening
-					mainBoard = mainBoard.makeMove((21 << 6) + 6, true);
-					unMoved = false;
-					return;
-					
+			if (getMainBoard() instanceof TicTacToeBoard) {
+				DEPTH = 10;
+			} else {
+			//create the depth by limiting us to searching through a max number of possibilties
+				//positions
+				int DEPTH = (int) (Math.log(10000000.0) / Math.log(getMainBoard().getPossibleMoves(true).size() + 1) - 1);
+
+				if (getMainBoard() instanceof BigOthello) {
+					DEPTH -= 1;
+					if (DEPTH > 8) {
+						DEPTH = 8;
+					}
 				}
-				
-				DEPTH = 4;
-							ArtificialIntelligence.DEPTH = DEPTH;
-		GameStateNode n = new GameStateNode(mainBoard, 0, true);
-Integer bestMove = n.getBestMove();
 
-Chess tempBoard = (Chess) (mainBoard.makeMove(bestMove, true));
+				if (getMainBoard() instanceof Chess) {
+					if (unMoved) {
+					//not an opening book, but a reasonable hardcoded opening
+						//mainBoard = mainBoard.makeMove((21 << 6) + 6, true);
+						//	unMoved = false;
+						//	return;
 
-if(tempBoard.isInCheck(true)){
- System.out.println(((Chess) mainBoard).isInCheck(true)?"Check-mate":"Stale-mate");
-	return;
-}
-		
-		
-		
-		}
-			ArtificialIntelligence.DEPTH = DEPTH;
-		GameStateNode n = new GameStateNode(mainBoard, 0, true);
+					}
 
-		Integer bestMove = n.getBestMove();
-		
+					DEPTH = 4;
+					ArtificialIntelligence.DEPTH = DEPTH;
+					GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
+					Integer bestMove = n.getBestMove();
 
+					Chess tempBoard = (Chess) (getMainBoard().makeMove(bestMove, true));
 
-			
-		if (bestMove != -1) {
-			mainBoard = mainBoard.makeMove(bestMove, true);
-		}
+					if (tempBoard.isInCheck(true)) {
+						System.out.println(((Chess) getMainBoard()).isInCheck(true) ? "Check-mate" : "Stale-mate");
+						return;
+					}
 
-		if (mainBoard.isGameOver()) {
-			System.out.println("GAME OVER!");
-			return;
-		}
+				}
+				ArtificialIntelligence.DEPTH = DEPTH;
+				GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
 
-	
+				Integer bestMove = n.getBestMove();
+
+				if (bestMove != -1) {
+					setMainBoard(getMainBoard().makeMove(bestMove, true));
+				}
+
+				if (getMainBoard().isGameOver()) {
+					System.out.println("GAME OVER!");
+					return;
+				}
+
+			}
+		} finally {
+			ArtificialIntelligence.computerIsThinking.set(false);
 		}
 	}
+
 	/**
 	 * @param args the command line arguments
 	 */
@@ -205,9 +232,17 @@ if(tempBoard.isInCheck(true)){
 	 * @return the SIZE
 	 */
 	public static int getSIZE() {
-		return mainBoard != null ? ((GenericBoardGame) mainBoard).getSize() : 3;
+		return getMainBoard() != null ? ((GenericBoardGame) getMainBoard()).getSize() : 3;
 	}
+	/**
+	 * Whether or not the human is the first player in the current game
+	 */
 	public static boolean humanPlaysFirst = true;
+
+	/**
+	 * Whether or not the human will be the first player in the next game
+	 */
+	public static boolean humanWillPlayFirst = true;
 
 	/**
 	 * @param aSIZE the SIZE to set
@@ -245,7 +280,7 @@ if(tempBoard.isInCheck(true)){
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					humanPlaysFirst = !humanPlaysFirst;
+					humanWillPlayFirst = !humanWillPlayFirst;
 				}
 
 			});
@@ -293,7 +328,27 @@ if(tempBoard.isInCheck(true)){
 			menu.add(menuItem);
 			menuBar.add(menu);
 
+			menu = new JMenu("Moves");
+
+			menuItem = new JMenuItem("Undo Move");
+			menuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (boards.size() > 2) {
+						boards.removeLast();
+						boards.removeLast();
+						g.repaint();
+					}
+				}
+
+			});
+
+			menu.add(menuItem);
+			menuBar.add(menu);
+
 			return menuBar;
+
 		}
 
 		public GameFrame() {
@@ -316,7 +371,7 @@ if(tempBoard.isInCheck(true)){
 		public static int OFFSET = (int) (SCALE * .15);
 		public static int TOKEN_SIZE = SCALE - OFFSET * 2;
 
-		public static int mouseDownLoc;
+		public static int mouseDownLoc = -1;
 
 		/**
 		 * the color that the AI uses, and what is "BLACK";
@@ -345,34 +400,50 @@ if(tempBoard.isInCheck(true)){
 
 				@Override
 				public void mousePressed(MouseEvent e) {
+					if(!ArtificialIntelligence.computerIsThinking.get()){
 					int x = e.getX();
 					int y = e.getY();
 					x /= GamePanel.SCALE;
 					y /= GamePanel.SCALE;
 					mouseDownLoc = y * getSIZE() + x;
-					if (!(mainBoard instanceof Chess)) {
-						mainBoard = mainBoard.makeMove(mouseDownLoc, false);
+					if (!(getMainBoard() instanceof Chess)) {
+						setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
 					}
-
+					}
 				}
 
 				@Override
 				public void mouseReleased(MouseEvent e) {
-					int x = e.getX();
-					int y = e.getY();
-					x /= GamePanel.SCALE;
-					y /= GamePanel.SCALE;
+					if (mouseDownLoc != -1) {
+						int x = e.getX();
+						int y = e.getY();
+						x /= GamePanel.SCALE;
+						y /= GamePanel.SCALE;
 
-					int move = (((y << 3) + x) << 6) + mouseDownLoc;
-					if (mainBoard instanceof Chess) {
-						boolean wasPawnMoved = (((Chess) mainBoard).getTileAtSpot(mouseDownLoc) & 7) == Chess.PAWN;
-						if (mainBoard.getPossibleMoves(false).contains(move) && !((Chess) mainBoard.makeMove(move, false)).isInCheck(false)) {
-							mainBoard = mainBoard.makeMove(move, false);
-							g.repaint();
+						int move = (((y << 3) + x) << 6) + mouseDownLoc;
+						if (getMainBoard() instanceof Chess) {
+							boolean wasPawnMoved = (((Chess) getMainBoard()).getTileAtSpot(mouseDownLoc) & 7) == Chess.PAWN;
+							if (getMainBoard().getPossibleMoves(false).contains(move) && !((Chess) getMainBoard().makeMove(move, false)).isInCheck(false)) {
+								setMainBoard(getMainBoard().makeMove(move, false));
+								g.repaint();
 
-							if (((Chess) mainBoard).getTileAtSpot((y << 3) + x) == Chess.QUEEN && wasPawnMoved) {
-								PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
-							} else {
+								if (((Chess) getMainBoard()).getTileAtSpot((y << 3) + x) == Chess.QUEEN && wasPawnMoved) {
+									PawnPromotionFrame p = new PawnPromotionFrame((y << 3) + x);
+								} else {
+									new Thread(new Runnable() {
+										public void run() {
+											try {
+												Thread.sleep(100);
+											} catch (Exception ex) {
+
+											}
+											ArtificialIntelligence.makeComputerMove();
+										}
+									}).start();
+								}
+							} else if (getMainBoard().getPossibleMoves(false).contains(move + 4096) && !((Chess) getMainBoard().makeMove(move, false)).isInCheck(false)) {
+								setMainBoard(getMainBoard().makeMove(move + 4096, false));
+								g.repaint();
 								new Thread(new Runnable() {
 									public void run() {
 										try {
@@ -384,23 +455,11 @@ if(tempBoard.isInCheck(true)){
 									}
 								}).start();
 							}
-						} else if (mainBoard.getPossibleMoves(false).contains(move + 4096)&& !((Chess) mainBoard.makeMove(move, false)).isInCheck(false)) {
-							mainBoard = mainBoard.makeMove(move + 4096, false);
-							g.repaint();
-							new Thread(new Runnable() {
-								public void run() {
-									try {
-										Thread.sleep(100);
-									} catch (Exception ex) {
 
-									}
-									ArtificialIntelligence.makeComputerMove();
-								}
-							}).start();
+						} else {
+							ArtificialIntelligence.makeComputerMove();
 						}
-
-					} else {
-						ArtificialIntelligence.makeComputerMove();
+						mouseDownLoc = -1;
 					}
 				}
 
@@ -439,7 +498,7 @@ if(tempBoard.isInCheck(true)){
 				g.fillRect(i * SCALE, 0, 2, getSIZE() * SCALE);
 				g.fillRect(0, i * SCALE, getSIZE() * SCALE, 2);
 			}
-			if (mainBoard == null) {
+			if (getMainBoard() == null) {
 
 			} else {
 
@@ -448,8 +507,8 @@ if(tempBoard.isInCheck(true)){
 					int y = i / getSIZE();
 					int xStart = x * SCALE + OFFSET;
 					int yStart = y * SCALE + OFFSET;
-					int tile = ((GenericBoardGame) mainBoard).getTileAtSpot(i);
-					if (mainBoard instanceof Chess) {
+					int tile = ((GenericBoardGame) getMainBoard()).getTileAtSpot(i);
+					if (getMainBoard() instanceof Chess) {
 						g.setColor(((x + y) & 1) == 0 ? Color.white : Color.black);
 						g.fillRect(x * SCALE, y * SCALE, SCALE, SCALE);
 						boolean isCompPiece = (tile & 8) != 0;
@@ -537,6 +596,21 @@ if(tempBoard.isInCheck(true)){
 						}
 					}
 				}
+				if (mouseDownLoc != -1) {
+					Graphics2D g2 = (Graphics2D) g;
+					g2.setStroke(new BasicStroke(4));
+					List<Integer> moves = ArtificialIntelligence.getMainBoard().getPossibleMoves(false);
+					for (int move : moves) {
+						move &= 4095;
+						if ((move & 63) == mouseDownLoc) {
+							if (!((Chess) ArtificialIntelligence.getMainBoard().makeMove(move, false)).isInCheck(false)) {
+								g2.setColor(Color.green);
+								g2.drawRect(((move >> 6) & 7) * SCALE, ((move >> 9) * SCALE), SCALE, SCALE);
+							}
+						}
+
+					}
+				}
 			}
 		}
 	}
@@ -578,7 +652,7 @@ if(tempBoard.isInCheck(true)){
 
 				@Override
 				public void mousePressed(MouseEvent e) {
-					Chess.setTileAtSpot(((Chess) mainBoard).state, PawnPromotionFrame.singletonPromotionFrame.spot, PawnPromotionFrame.pieces[e.getX() / GamePanel.SCALE]);
+					Chess.setTileAtSpot(((Chess) getMainBoard()).state, PawnPromotionFrame.singletonPromotionFrame.spot, PawnPromotionFrame.pieces[e.getX() / GamePanel.SCALE]);
 					PawnPromotionFrame.singletonPromotionFrame.dispose();
 					ArtificialIntelligence.makeComputerMove();
 				}
@@ -633,4 +707,4 @@ if(tempBoard.isInCheck(true)){
 		}
 	}
 
-} 
+}
