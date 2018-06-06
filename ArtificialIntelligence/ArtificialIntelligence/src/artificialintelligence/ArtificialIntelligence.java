@@ -151,9 +151,9 @@ public class ArtificialIntelligence {
 			}
 
 			if (getMainBoard() instanceof TicTacToeBoard) {
-				DEPTH = 10;
+				DEPTH = getMainBoard().getPossibleMoves(true).size();
 			} else {
-			//create the depth by limiting us to searching through a max number of possibilties
+				//create the depth by limiting us to searching through a max number of possibilties
 				//positions
 				int DEPTH = (int) (Math.log(10000000.0) / Math.log(getMainBoard().getPossibleMoves(true).size() + 1) - 1);
 
@@ -165,15 +165,8 @@ public class ArtificialIntelligence {
 				}
 
 				if (getMainBoard() instanceof Chess) {
-					if (unMoved) {
-					//not an opening book, but a reasonable hardcoded opening
-						//mainBoard = mainBoard.makeMove((21 << 6) + 6, true);
-						//	unMoved = false;
-						//	return;
-
-					}
-
 					DEPTH = 4;
+
 					ArtificialIntelligence.DEPTH = DEPTH;
 					GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
 					Integer bestMove = n.getBestMove();
@@ -184,22 +177,24 @@ public class ArtificialIntelligence {
 						System.out.println(((Chess) getMainBoard()).isInCheck(true) ? "Check-mate" : "Stale-mate");
 						return;
 					}
-
-				}
-				ArtificialIntelligence.DEPTH = DEPTH;
-				GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
-
-				Integer bestMove = n.getBestMove();
-
-				if (bestMove != -1) {
-					setMainBoard(getMainBoard().makeMove(bestMove, true));
-				}
-
-				if (getMainBoard().isGameOver()) {
-					System.out.println("GAME OVER!");
+					setMainBoard(tempBoard);
 					return;
 				}
+				ArtificialIntelligence.DEPTH = DEPTH;
+			}
 
+			
+			GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
+
+			Integer bestMove = n.getBestMove();
+
+			if (bestMove != -1) {
+				setMainBoard(getMainBoard().makeMove(bestMove, true));
+			}
+
+			if (getMainBoard().isGameOver()) {
+				System.out.println("GAME OVER!");
+				return;
 			}
 		} finally {
 			ArtificialIntelligence.computerIsThinking.set(false);
@@ -400,15 +395,15 @@ public class ArtificialIntelligence {
 
 				@Override
 				public void mousePressed(MouseEvent e) {
-					if(!ArtificialIntelligence.computerIsThinking.get()){
-					int x = e.getX();
-					int y = e.getY();
-					x /= GamePanel.SCALE;
-					y /= GamePanel.SCALE;
-					mouseDownLoc = y * getSIZE() + x;
-					if (!(getMainBoard() instanceof Chess)) {
-						setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
-					}
+					if (!ArtificialIntelligence.computerIsThinking.get()) {
+						int x = e.getX();
+						int y = e.getY();
+						x /= GamePanel.SCALE;
+						y /= GamePanel.SCALE;
+						mouseDownLoc = y * getSIZE() + x;
+						if (!(getMainBoard() instanceof Chess)) {
+							setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
+						}
 					}
 				}
 

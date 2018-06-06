@@ -1,3 +1,11 @@
-Plays trivial games (namely tic tac toe) by brute forcing the whole game tree state and applying minimax.
+I present an AI which has been taught to play a variety of games of perfect information including Chess. Here is a list of games it can play.
 
-It will later play non-trivial games by applying minimax to some kiind of "hueristic"
+<ul>
+<li>Chess</li>
+<li>Othello/Reversi Classic (8x8)</li>
+<li>Othello/Reversi 5x5</li>
+<li>Tic-Tac-Toe</li>
+<li>4x4 Tic-Tac-Toe where you need 3 of your kind and one of your opponents to win</li>
+</ul>
+
+![alt tag](https://raw.githubusercontent.com/rjhunjhunwala/AI/blob/master/Screenshot.gif)
