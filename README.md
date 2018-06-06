@@ -9,3 +9,5 @@ I present an AI which has been taught to play a variety of games of perfect info
 </ul>
 
 ![alt tag](https://raw.githubusercontent.com/rjhunjhunwala/AI/blob/master/Screenshot.gif)
+
+![alt tag](https://github.com/rjhunjhunwala/AI/blob/master/Screenshot.gif)
