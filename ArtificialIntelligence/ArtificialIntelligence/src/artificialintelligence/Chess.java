@@ -222,7 +222,7 @@ Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpotSpecial(i);
 		//encourage owning material
-			value += (2 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
+			value += (4 * (((piece & 8) >> 2) - 1)) * (VALUES[piece & 7]);
 	 
 			if((piece&7)==KING||(piece&7)==ROOK){		
 			//encourage not moving the king or rook... heavily
