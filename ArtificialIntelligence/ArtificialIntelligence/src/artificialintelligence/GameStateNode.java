@@ -9,7 +9,7 @@ import java.util.List;
  * @author rohan
  */
 public class GameStateNode {
-
+public boolean QUIESCENCE_SEARCH = false;
 	/**
 	 * The current state
 	 */
@@ -124,8 +124,38 @@ public class GameStateNode {
 				return value;
 			}
 		} else {
-			//perhaps quiescience search, but I'm not exactly competent...
-			//just don't go further down the tree and call it a day...
+			if(QUIESCENCE_SEARCH){
+			if(isComputerTurn){
+
+				List<Integer> moves = this.state.getPossibleMoves(true);
+if(moves.isEmpty()){
+	return this.state.getValue();
+}
+				int best = Integer.MIN_VALUE;
+int a;
+for(int move:moves){
+	if((a=this.state.makeMove(move,true).getValue())>best){
+		best = a;
+	}
+}
+return best;
+			}else{
+			
+							List<Integer> moves = this.state.getPossibleMoves(false);
+			if(moves.isEmpty()){
+				return this.state.getValue();
+			}
+							int worst = Integer.MAX_VALUE;
+int a;
+for(int move:moves){
+	if((a=this.state.makeMove(move,true).getValue())<worst){
+		worst = a;
+	}
+}
+return worst;
+	
+			}
+			}
 			return state.getValue();
 		}
 	}

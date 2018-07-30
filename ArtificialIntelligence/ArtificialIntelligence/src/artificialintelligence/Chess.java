@@ -105,7 +105,7 @@ public class Chess extends GenericBoardGame {
 	/**
 	 * Ok, so we store the state of a single chessboard as an array of longs This
 	 * is for "performance" and "memory optimization" reasons (I think it helps but
-	 * I can't prove it. Each long, represents one row. A long is 64 bits, so we
+	 * I can't prove it.) Each long, represents one row. A long is 64 bits, so we
 	 * can use around 8 bits to store each piece which should be "plenty"
 	 */
 	public long[] state;
@@ -117,26 +117,20 @@ public class Chess extends GenericBoardGame {
 	public Chess() {
 		state = new long[8];
 		for (int i = 0; i < 8; i++) {
-	Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
-		Chess.setTileAtSpot(state, 48 + i, PAWN);
+			//Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
+		//Chess.setTileAtSpot(state, 48 + i, PAWN);
 		}
-	Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
-Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3)+ (UNMOVED << 4));
-Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3)+ (UNMOVED << 4));
-Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3)+ (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3)+ (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 4, KING + (BLACK << 3)+(UNMOVED << 4));
-		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3)+ (UNMOVED << 4));
+//	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
+//		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
 
-Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
-Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
-Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
-Chess.setTileAtSpot(state, 62, KNIGHT+ (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
-Chess.setTileAtSpot(state, 61, BISHOP+ (UNMOVED << 4));
+//		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
+//	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
+//	Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
+//	Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
+//	Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
+//		Chess.setTileAtSpot(state, 61, BISHOP + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 59, QUEEN+ (UNMOVED << 4));
+//		Chess.setTileAtSpot(state, 59, QUEEN + (UNMOVED << 4));
 
 	}
 
@@ -154,7 +148,7 @@ Chess.setTileAtSpot(state, 61, BISHOP+ (UNMOVED << 4));
 			}
 		}
 
-	for (int a : this.getPossibleMoves(!isAgainstComputerPlayer, true, true)) {
+		for (int a : this.getPossibleMoves(!isAgainstComputerPlayer, true, true)) {
 			if (a >> 6 == kingLoc) {
 				return true;
 			}
@@ -208,7 +202,7 @@ Chess.setTileAtSpot(state, 61, BISHOP+ (UNMOVED << 4));
 	 */
 	@Override
 	public int getValue() {
-		
+
 //		if(isInCheck(true)){
 //			if(getPossibleMoves(true).isEmpty()){
 //				return -2 * VALUES[KING];
@@ -224,23 +218,24 @@ Chess.setTileAtSpot(state, 61, BISHOP+ (UNMOVED << 4));
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpotSpecial(i);
 //System.out.println(piece);
-pieceCount -= (((~(piece&15))&15)/15);		
+	// Branchless == fast, a very quick (in theory) this is the fun way of saying subtract one iff empty 
+			pieceCount -= (((~(piece & 15)) & 15) / 15);
 //encourage owning material
-			value += (((((piece & 8) >> 2) - 1))<<2) * (VALUES[piece & 7]);
-	 
-			if((piece&7)==KING||(piece&7)==ROOK){		
-			//encourage not moving the king or rook... heavily
-				value += (((((piece & 8) >> 2) - 1)) * (piece & 16))<<2;
-		}
-		
-if(((i>>3)>0&&(piece&8)==8)&&((piece&7)==BISHOP||(piece&7)==KNIGHT)){
-	//lightly encourage piece developement
+			value += (((((piece & 8) >> 2) - 1)) << 2) * (VALUES[piece & 7]);
+
+			if ((piece & 7) == KING || (piece & 7) == ROOK) {
+				//encourage not moving the king or rook... heavily
+				value += (((((piece & 8) >> 2) - 1)) * (piece & 16)) << 3;
+			}
+
+			if (((i >> 3) > 0 && (piece & 8) == 8) && ((piece & 7) == BISHOP || (piece & 7) == KNIGHT)) {
+				//lightly encourage piece developement
 				value += 32;
-}
-if(((i>>3)<7&&(piece&8)==0)&&((piece&7)==BISHOP||(piece&7)==KNIGHT)){
-	//lightly discourage hostile developement
+			}
+			if (((i >> 3) < 7 && (piece & 8) == 0) && ((piece & 7) == BISHOP || (piece & 7) == KNIGHT)) {
+				//lightly discourage hostile developement
 				value -= 32;
-}
+			}
 
 //lightly encourage moving pawns up the board, and discourage enemy advancement
 			if ((piece & 7) == PAWN) {
@@ -251,40 +246,44 @@ if(((i>>3)<7&&(piece&8)==0)&&((piece&7)==BISHOP||(piece&7)==KNIGHT)){
 				}
 			}
 		}
-
-if(pieceCount <7){
-	List<Integer> compMoves = getPossibleMoves(true,false,true);
-	LinkedList<Integer> compChecks = new LinkedList<>();
-	for(Integer c:compMoves){
-	 compChecks.add((c>>6)&63);
-	}
-	List<Integer> humanMoves = getPossibleMoves(false,false,true);
+if(pieceCount < 8){
+		List<Integer> compMoves = getPossibleMoves(true, false, true);
+		LinkedList<Integer> compChecks = new LinkedList<>();
+		for (Integer c : compMoves) {
+			compChecks.add((c >> 6) & 63);
+		}
+		List<Integer> humanMoves = getPossibleMoves(false, false, true);
 		LinkedList<Integer> humanChecks = new LinkedList<>();
-	for(Integer c:humanMoves){
-	 compChecks.add((c>>6)&63);
-	}
-		for(Integer c:compMoves){
-	 compChecks.add((c>>6)&63);
-	}
-	int start = 0;
-	for(int i = 0;i<64;i++){
-		if(getTileAtSpot(i)==(KING+(BLACK<<3))){
-			start = i;
-			break;
+		for (Integer c : humanMoves) {
+			compChecks.add((c >> 6) & 63);
 		}
-	}
-int compBoxSize = getFloodFillSize(start,humanChecks);
-	for(int i = 0;i<64;i++){
-		if(getTileAtSpot(i)==(KING)){
-			start = i;
-			break;
+		for (Integer c : compMoves) {
+			compChecks.add((c >> 6) & 63);
 		}
-	}
-int humanBoxSize = getFloodFillSize(start,compChecks);
-value -= (64 - compBoxSize);
-value += (64 - humanBoxSize);
+		int start = 0;
+		int compKingStartX, compKingStartY;
+		for (int i = 0; i < 64; i++) {
+			if ((getTileAtSpot(i) & 15) == (KING + (BLACK << 3))) {
+				start = i;
+				break;
+			}
+		}
+		compKingStartX = start%8;
+		compKingStartY = start & 0b111000;
+		int compBoxSize = getFloodFillSize(start, humanChecks);
+		int humanKingStartX,humanKingStartY;
+		for (int i = 0; i < 64; i++) {
+			if ((getTileAtSpot(i) & 15) == (KING)) {
+				start = i;
+				break;
+			}
+		}
+				humanKingStartX = start%8;
+		humanKingStartY = start & 0b111000;
+value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingStartY-compKingStartY)));
+		int humanBoxSize = getFloodFillSize(start, compChecks);
 }else{
-			//encourage owning a spot in the center
+		//encourage owning a spot in the center
 		value += ((((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
 		value += ((((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
 		value += ((((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
@@ -297,57 +296,85 @@ value += (64 - humanBoxSize);
 		if ((getTileAtSpot(6) & 7) == KING && ((getTileAtSpot(5) & 7) == ROOK)) {
 			value += 135;
 		}
-
 }
 		return value;
 	}
-	/**
-		* Given a starting X and Y coordinate and zero indexed boolean array, where
-		* wallArrayChecks[x][y] is whether x,y is an impassable square, return the size
-		* of the simply connected region bounded by the impasses and/or some combination of the walls
-		* using a floodfill method
-		*/
-	public static int getFloodFillSize(int start,List<Integer> checks){
-int ret = 0;		
-checks.add(start);
-LinkedList<Integer> frontier = new LinkedList<>();
-frontier.add(start);
-while(!frontier.isEmpty()){
-	LinkedList<Integer> finalFrontier = new LinkedList<>();
-	for(Integer a:frontier){
 
-	if(a-8>0){
-		if(!checks.contains(a-8)){
-			checks.add(a-8);
-			finalFrontier.add(a-8);
-			ret++;
-		}
-	}
-		if(a+8<64){
-		if(!checks.contains(a+8)){
-			checks.add(a+8);
-			finalFrontier.add(a+8);
-			ret++;
-		}
-	}
-				if((a&7)>0){
-		if(!checks.contains(a-1)){
-			checks.add(a-1);
-			finalFrontier.add(a-1);
-			ret++;
-		}
-	}
-								if((a&7)<7){
-		if(!checks.contains(a+1)){
-			checks.add(a+1);
-			finalFrontier.add(a+1);
-			ret++;
-		}
-	}
-	}
-frontier = finalFrontier;
-}
-return ret;
+	/**
+	 * Given a starting X and Y coordinate and zero indexed boolean array, where
+	 * wallArrayChecks[x][y] is whether x,y is an impassable square, return the
+	 * size of the simply connected region bounded by the impasses and/or some
+	 * combination of the walls using a floodfill method
+	 */
+	public static int getFloodFillSize(int start, List<Integer> checks) {
+		int ret = 0;
+		checks.add(start);
+		LinkedList<Integer> frontier = new LinkedList<>();
+		frontier.add(start);
+		while (!frontier.isEmpty()) {
+			LinkedList<Integer> finalFrontier = new LinkedList<>();
+			for (Integer a : frontier) {
+
+				if (a - 8 > 0) {
+					if (!checks.contains(a - 8)) {
+						checks.add(a - 8);
+						finalFrontier.add(a - 8);
+						ret++;
+					}
+				}
+				if (a - 8 > 0 && (a & 7) > 0) {
+					if (!checks.contains(a - 9)) {
+						checks.add(a - 9);
+						finalFrontier.add(a - 9);
+						ret++;
+					}
+				}
+				if (a - 8 > 0 && (a & 7) < 7) {
+					if (!checks.contains(a - 7)) {
+						checks.add(a - 7);
+						finalFrontier.add(a - 7);
+						ret++;
+					}
+				}
+				if (a + 8 < 64 && (a & 7) < 7) {
+					if (!checks.contains(a + 9)) {
+						checks.add(a + 9);
+						finalFrontier.add(a + 9);
+						ret++;
+					}
+				}
+					if (a + 8 < 64 && (a & 7) > 0) {
+						if (!checks.contains(a + 7)) {
+							checks.add(a + 7);
+							finalFrontier.add(a + 7);
+							ret++;
+						}
+					}
+						if (a + 8 < 64) {
+							if (!checks.contains(a + 8)) {
+								checks.add(a + 8);
+								finalFrontier.add(a + 8);
+								ret++;
+							}
+						}
+						if ((a & 7) > 0) {
+							if (!checks.contains(a - 1)) {
+								checks.add(a - 1);
+								finalFrontier.add(a - 1);
+								ret++;
+							}
+						}
+						if ((a & 7) < 7) {
+							if (!checks.contains(a + 1)) {
+								checks.add(a + 1);
+								finalFrontier.add(a + 1);
+								ret++;
+							}
+						}
+					}
+					frontier = finalFrontier;
+				}
+		return ret;
 	}
 
 	/**
@@ -360,7 +387,8 @@ return ret;
 	 * @return
 	 */
 	@Override
-	public List<Integer> getPossibleMoves(boolean isComputerMove) {
+	public List<Integer> getPossibleMoves(boolean isComputerMove
+	) {
 		return getPossibleMoves(isComputerMove, true, true);
 	}
 
