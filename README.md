@@ -23,7 +23,7 @@ Unfortunatley, the AI is admittedly shortsighted. Because chess has such a high 
 
 <hr/>
 
-The Turk was presented as a mechanical commputer of a sort, which was capable of playing chess, solving the knights tour and even conversing with users in multiple languages. It was noted, that the machine would play agressively, and defeat almost any challenger in a short amount of time. Sometime later,it was noted that this was an elaborate hoax, and a team of human operators were really responsible for the operation of the machine. 
+*The Turk was presented as a mechanical commputer of a sort, which was capable of playing chess, solving the knights tour and even conversing with users in multiple languages. It was noted, that the machine would play agressively, and defeat almost any challenger in a short amount of time. Sometime later, it was noted that this was an elaborate hoax, and a team of human operators were really responsible for the operation of the machine. 
 
 This machine, neither speaks any languages, nor poses any real threat to a well versed chess player. However, what my machine lacks as a polyglot or a chess grandmaster, it makes up for by not concealing a human operator, like the turk
 
