@@ -124,6 +124,7 @@ public boolean QUIESCENCE_SEARCH = false;
 				return value;
 			}
 		} else {
+					//System.out.println(isComputerTurn);
 			if(QUIESCENCE_SEARCH){
 			if(isComputerTurn){
 

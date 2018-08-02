@@ -27,24 +27,24 @@ public class Chess extends GenericBoardGame {
 	/**
 	 * The queen's value in centi-pawns
 	 */
-	public static final int QUEEN_VALUE = 1180;
+	public static final int QUEEN_VALUE = 1280;
 	/**
 	 * The value of a rook
 	 */
-	public static final int ROOK_VALUE = 660;
+	public static final int ROOK_VALUE = 680;
 	/**
 	 * The Bishop's value, let us consider a bishop to be slightly better than a
 	 * knight
 	 */
-	public static final int BISHOP_VALUE = 430;
+	public static final int BISHOP_VALUE = 440;
 	/**
 	 * The knight's value
 	 */
-	public static final int KNIGHT_VALUE = 400;
+	public static final int KNIGHT_VALUE = 420;
 	/**
 	 * Base value of a pawn, later gets more points for being higher
 	 */
-	public static final int PAWN_VALUE = 70;
+	public static final int PAWN_VALUE = 60;
 
 	/**
 	 * These constants are the constants used to represent pieces
@@ -117,20 +117,26 @@ public class Chess extends GenericBoardGame {
 	public Chess() {
 		state = new long[8];
 		for (int i = 0; i < 8; i++) {
-			//Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
-		//Chess.setTileAtSpot(state, 48 + i, PAWN);
+			Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
+	Chess.setTileAtSpot(state, 48 + i, PAWN);
 		}
-//	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
-//		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3)  + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3) + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3) + (UNMOVED << 4));
 
-//		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
-//	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
-//	Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
-//	Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
-//	Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
-//		Chess.setTileAtSpot(state, 61, BISHOP + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
+	Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 61, BISHOP + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
-//		Chess.setTileAtSpot(state, 59, QUEEN + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 59, QUEEN + (UNMOVED << 4));
 
 	}
 
@@ -221,7 +227,7 @@ public class Chess extends GenericBoardGame {
 	// Branchless == fast, a very quick (in theory) this is the fun way of saying subtract one iff empty 
 			pieceCount -= (((~(piece & 15)) & 15) / 15);
 //encourage owning material
-			value += (((((piece & 8) >> 2) - 1)) << 2) * (VALUES[piece & 7]);
+			value += (((((piece & 8) >> 2) - 1))) * (VALUES[piece & 7]);
 
 			if ((piece & 7) == KING || (piece & 7) == ROOK) {
 				//encourage not moving the king or rook... heavily
@@ -239,10 +245,10 @@ public class Chess extends GenericBoardGame {
 
 //lightly encourage moving pawns up the board, and discourage enemy advancement
 			if ((piece & 7) == PAWN) {
-				if ((piece & 8) == 8) {
+				if ((piece & 8) == (BLACK<<3)) {
 					value += PAWN_VALUE_TABLE[(i >> 3)];
 				} else {
-					value -= PAWN_VALUE_TABLE[(~(i >> 3)) & 7];
+					value -= PAWN_VALUE_TABLE[7 - (i>>3)];
 				}
 			}
 		}
@@ -282,6 +288,8 @@ if(pieceCount < 8){
 		humanKingStartY = start & 0b111000;
 value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingStartY-compKingStartY)));
 		int humanBoxSize = getFloodFillSize(start, compChecks);
+		 value -= (64 - compBoxSize)<<1;
+		value += (64 - humanBoxSize)<<1;
 }else{
 		//encourage owning a spot in the center
 		value += ((((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
@@ -377,19 +385,10 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 		return ret;
 	}
 
-	/**
-	 * List of current rule simplifications, none!!
-	 *
-	 * I apologize in advance for this absurd method. The repetition, is
-	 * technically for performance.
-	 *
-	 * @param isComputerMove
-	 * @return
-	 */
 	@Override
 	public List<Integer> getPossibleMoves(boolean isComputerMove
 	) {
-		return getPossibleMoves(isComputerMove, true, true);
+		return getPossibleMoves(isComputerMove, true, false);
 	}
 
 	/**

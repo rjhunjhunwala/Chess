@@ -24,6 +24,22 @@ import javax.swing.*;
  */
 public class ArtificialIntelligence {
 
+	public static enum Difficulty {
+
+		baby,
+		child,
+		easy,
+		medium,
+		hard;
+	}
+
+	public static Difficulty difficulty = Difficulty.medium;
+
+	public static final int[] CHESS_DIFFICULTY = new int[]{1, 2, 3, 4, 5};
+	public static final int[] TIC_TAC_TOE_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
+	public static final int[] OTHELLO_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
+	public static final int[] DALL_BALL_DIFFICULTY = new int[]{1, 2, 4, 8, 12};
+
 	public static final AtomicBoolean computerIsThinking = new AtomicBoolean(false);
 
 	/**
@@ -76,6 +92,21 @@ public class ArtificialIntelligence {
 	public static GameFrame g;
 
 	public static final String[] GAMES = new String[]{"Tic-Tac-Toe", "Dall Ball (3x's and one O to win)", "Othello/Reversi (5x5)", "Othello (8x8)", "Chess"};
+
+	public static final String[] DIFFICULTY_TEXTS = new String[]{"Baby", "Child", "Easy", "Medium", "Hard (SLOW)"};
+
+	public static class DifficultyActionListener implements ActionListener {
+
+		Difficulty difficulty;
+
+		DifficultyActionListener(Difficulty difficulty) {
+			this.difficulty = difficulty;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			ArtificialIntelligence.difficulty = this.difficulty;
+		}
+	}
 
 	public static class GameActionListener implements ActionListener {
 
@@ -134,70 +165,28 @@ public class ArtificialIntelligence {
 	 * Let the ai make it's move
 	 */
 	public static void makeComputerMove() {
-		ArtificialIntelligence.computerIsThinking.set(true);
-		try {
-			if (getMainBoard().isGameOver()) {
-				System.out.println("GAME OVER!");
-				return;
-			} else if (getMainBoard().getPossibleMoves(true).size() == 0) {
-				//no moves... do nothing
-				System.out.println("No legal moves");
-				return;
-			} else if (getMainBoard().getPossibleMoves(true).size() == 1) {
-				//only one move, don't over-think it
-				System.out.println("Forced move");
-				setMainBoard(getMainBoard().makeMove(getMainBoard().getPossibleMoves(true).get(0), true));
-				return;
-			}
-
-			if (getMainBoard() instanceof TicTacToeBoard) {
-				DEPTH = getMainBoard().getPossibleMoves(true).size();
-			} else {
-				//create the depth by limiting us to searching through a max number of possibilties
-				//positions
-				int DEPTH = (int) (Math.log(10000000.0) / Math.log(getMainBoard().getPossibleMoves(true).size() + 1) - 1);
-
-				if (getMainBoard() instanceof BigOthello) {
-					DEPTH -= 1;
-					if (DEPTH > 8) {
-						DEPTH = 8;
-					}
+		if (!getMainBoard().isGameOver() && !ArtificialIntelligence.getMainBoard().getPossibleMoves(true).isEmpty()) {
+			ArtificialIntelligence.computerIsThinking.set(true);
+			try {
+				Board mainBoard = getMainBoard();
+				if (mainBoard instanceof Chess) {
+					DEPTH = ArtificialIntelligence.CHESS_DIFFICULTY[difficulty.ordinal()];
+				} else if (mainBoard instanceof TicTacToeBoard) {
+					DEPTH = ArtificialIntelligence.TIC_TAC_TOE_DIFFICULTY[difficulty.ordinal()];
+				} else if (mainBoard instanceof Othello || mainBoard instanceof BigOthello) {
+					DEPTH = ArtificialIntelligence.OTHELLO_DIFFICULTY[difficulty.ordinal()];
+				} else if (mainBoard instanceof DallBallBoard) {
+					DEPTH = ArtificialIntelligence.DALL_BALL_DIFFICULTY[difficulty.ordinal()];
 				}
 
-				if (getMainBoard() instanceof Chess) {
-					DEPTH = 4;
-
-					ArtificialIntelligence.DEPTH = DEPTH;
-					GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
-					Integer bestMove = n.getBestMove();
-
-					Chess tempBoard = (Chess) (getMainBoard().makeMove(bestMove, true));
-
-					if (tempBoard.isInCheck(true)) {
-						System.out.println(((Chess) getMainBoard()).isInCheck(true) ? "Check-mate" : "Stale-mate");
-						return;
-					}
-					setMainBoard(tempBoard);
-					return;
+				AlphaBetaNode node = new AlphaBetaNode(mainBoard);
+				if (!getMainBoard().getPossibleMoves(true).isEmpty()) {
+					int bestMove = node.getBestMove();
+					setMainBoard(mainBoard.makeMove(bestMove, true));
 				}
-				ArtificialIntelligence.DEPTH = DEPTH;
+			} finally {
+				ArtificialIntelligence.computerIsThinking.set(false);
 			}
-
-			
-			GameStateNode n = new GameStateNode(getMainBoard(), 0, true);
-
-			Integer bestMove = n.getBestMove();
-
-			if (bestMove != -1) {
-				setMainBoard(getMainBoard().makeMove(bestMove, true));
-			}
-
-			if (getMainBoard().isGameOver()) {
-				System.out.println("GAME OVER!");
-				return;
-			}
-		} finally {
-			ArtificialIntelligence.computerIsThinking.set(false);
 		}
 	}
 
@@ -338,10 +327,36 @@ public class ArtificialIntelligence {
 				}
 
 			});
+			menu.add(menuItem);
+
+			menuItem = new JMenuItem("Pass (If no moves in Othello)");
+			menuItem.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					Board mainBoard = getMainBoard();
+					if (mainBoard instanceof Othello || mainBoard instanceof BigOthello) {
+						if (mainBoard.getPossibleMoves(false).get(0).equals(BigOthello.NO_MOVE)) {
+							System.out.println("here");
+							makeComputerMove();
+						}
+					}
+				}
+
+			});
 
 			menu.add(menuItem);
 			menuBar.add(menu);
 
+			menu = new JMenu("Difficulty");
+
+			for (int i = 0; i < DIFFICULTY_TEXTS.length; i++) {
+				menu.add(menuItem = new JMenuItem(DIFFICULTY_TEXTS[i]));
+				menuItem.addActionListener(new DifficultyActionListener(Difficulty.values()[i]));
+
+			}
+
+			menuBar.add(menu);
 			return menuBar;
 
 		}
@@ -402,7 +417,11 @@ public class ArtificialIntelligence {
 						y /= GamePanel.SCALE;
 						mouseDownLoc = y * getSIZE() + x;
 						if (!(getMainBoard() instanceof Chess)) {
+							if(getMainBoard().getPossibleMoves(false).contains(mouseDownLoc)){
 							setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
+							}else{
+								mouseDownLoc = -1;
+							}
 						}
 					}
 				}

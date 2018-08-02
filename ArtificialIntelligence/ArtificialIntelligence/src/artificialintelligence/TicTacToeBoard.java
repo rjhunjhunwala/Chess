@@ -1,4 +1,3 @@
-
 package artificialintelligence;
 
 import java.util.ArrayList;
@@ -76,17 +75,17 @@ public class TicTacToeBoard extends GenericBoardGame {
 	}
 
 	/**
-	 * The following integer is used to store the whole array as an integer
-		* The bitshift associated with storing 9 values in a single int is moderately
-		* sketchy, and beyond the scope of a single comment
+	 * The following integer is used to store the whole array as an integer The
+	 * bitshift associated with storing 9 values in a single int is moderately
+	 * sketchy, and beyond the scope of a single comment
 	 */
 	private int state = 0;
 
-	
 	/**
-		* Intialize a board with a given inState
-		* @param inState the initial state
-		*/
+	 * Intialize a board with a given inState
+	 *
+	 * @param inState the initial state
+	 */
 	public TicTacToeBoard(int inState) {
 		state = inState;
 	}
@@ -146,10 +145,11 @@ public class TicTacToeBoard extends GenericBoardGame {
 	}
 
 	/**
-	 * Determine whether or not a row is made based on the product, and determine
-	 * whether or not to add or subtract points accordingly Bitshift nonsense is
-	 * fully unjustifiable here, but fun nonetheless, and a branchless alternative
-		* this speeds up performance (I think, but haven't proved it)
+	 * Determine whether or not a row is made based on the product, and
+	 * determine whether or not to add or subtract points accordingly Bitshift
+	 * nonsense is fully unjustifiable here, but fun nonetheless, and a
+	 * branchless alternative this speeds up performance (I think, but haven't
+	 * proved it)
 	 *
 	 * @param product the product of a line of three
 	 * @return
@@ -158,12 +158,12 @@ public class TicTacToeBoard extends GenericBoardGame {
 		return (product & 1) - (product >> 3);
 	}
 
-	
 	/**
-		* Functions as expected
-		* @param isComputerMove whether or not it's the computer move
-		* @return just a list of open squares
-		*/
+	 * Functions as expected
+	 *
+	 * @param isComputerMove whether or not it's the computer move
+	 * @return just a list of open squares
+	 */
 	@Override
 	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Integer> moves = new ArrayList<>();
@@ -188,13 +188,16 @@ public class TicTacToeBoard extends GenericBoardGame {
 		int spot = m;
 		return new TicTacToeBoard(manipulateState(state, spot, tile));
 	}
-public int getSize(){
-	return 3;
-}
+
+	public int getSize() {
+		return 3;
+	}
+
 	/**
-		* Game is over, if someone has won (the magnitude of the value is non-zero)
-		* @return whether or not someone has won
-		*/
+	 * Game is over, if someone has won (the magnitude of the value is non-zero)
+	 *
+	 * @return whether or not someone has won
+	 */
 	@Override
 	public boolean isGameOver() {
 		return getValue() != 0;

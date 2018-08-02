@@ -31,6 +31,12 @@ public class BigOthello extends GenericBoardGame {
 	public static final int O_TILE = 2;
 
 	/**
+	 * represents making no move... remember, sometimes the only winning move,
+	 * is not to play...
+	 */
+	public static final int NO_MOVE = 0b111111111111111111111111111;
+	
+	/**
 	 * Display Board
 	 */
 	public static void displayBoard() {
@@ -110,11 +116,14 @@ public class BigOthello extends GenericBoardGame {
 				moves.add(i);
 			}
 		}
+		if(moves.isEmpty()){
+			moves.add(NO_MOVE);
+		}
 		return moves;
 	}
 
 	/**
-	 * Checks if a spot is a legal move move
+	 * Checks if a spot is a legal move 
 	 *
 	 * @param spot the spot to move to
 	 * @param isComputerMove whether or not it's the computers move
@@ -169,12 +178,16 @@ public class BigOthello extends GenericBoardGame {
 	 */
 	@Override
 	public Board makeMove(int m, boolean isComputerMove) {
+		int[] newState = new int[]{state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7]};
+		if(m == NO_MOVE){
+			return new BigOthello(newState);
+		}
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		int spot = m;
 		int x = spot & 7;
 		int y = spot / 8;
 		//looks stupid, but 
-		int[] newState = new int[]{state[0], state[1], state[2], state[3], state[4], state[5], state[6], state[7]};
+		
 		newState[y] = manipulateState(newState[y], x, tile);
 		for (int a = -1; a < 2; a++) {
 			for (int b = -1; b < 2; b++) {

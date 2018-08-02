@@ -1,4 +1,3 @@
-
 package artificialintelligence;
 
 import java.util.ArrayList;
@@ -9,10 +8,10 @@ import java.util.ArrayList;
  * @author Rohan
  */
 public class Othello extends GenericBoardGame {
-	
+
 	public static final int STARTING_VALUE = 37773312;
 	public static final int ALT_STARTING_VALUE = 25202688;
-	
+
 	/**
 	 * Corners are counted as (C_B_W+1)*whoOccupiesIt
 	 */
@@ -30,7 +29,6 @@ public class Othello extends GenericBoardGame {
 	 * The O tile Constant
 	 */
 	public static final int O_TILE = 2;
-
 
 	/**
 	 * Returns a manipulated version of "state" so that the given spot now has a
@@ -86,8 +84,8 @@ public class Othello extends GenericBoardGame {
 	}
 
 	/**
-	 * Evaluates a position for it's value, basically counting computer dots, 
-		* and awarding the computer for corners
+	 * Evaluates a position for it's value, basically counting computer dots,
+	 * and awarding the computer for corners
 	 *
 	 * @return the "Value" (heuristically)
 	 */
@@ -104,11 +102,13 @@ public class Othello extends GenericBoardGame {
 		value += CORNER_BONUS_WEIGHT * ((getTileAtSpot(24) & 1) - ((getTileAtSpot(24) & 2) << 2));
 		return value; //* (1 - ((1 - notGottenFromIllegalMove)<<15));
 	}
-/**
-	* Gets a list of the legal moves available
-	* @param isComputerMove whether or not it's the computer turn
-	* @return the list of valid moves
-	*/
+
+	/**
+	 * Gets a list of the legal moves available
+	 *
+	 * @param isComputerMove whether or not it's the computer turn
+	 * @return the list of valid moves
+	 */
 	@Override
 	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
 		ArrayList<Integer> moves = new ArrayList<>();
@@ -117,15 +117,19 @@ public class Othello extends GenericBoardGame {
 				moves.add((i));
 			}
 		}
+		if (moves.isEmpty()) {
+			moves.add(BigOthello.NO_MOVE);
+		}
 		return moves;
 	}
 
 	/**
-		* Checks legality
-		* @param spot to move to
-		* @param isComputerMove whether not the computer is moving
-		* @return whether or not the move is legal
-		*/
+	 * Checks legality
+	 *
+	 * @param spot to move to
+	 * @param isComputerMove whether not the computer is moving
+	 * @return whether or not the move is legal
+	 */
 	public boolean isLegalMove(int spot, boolean isComputerMove) {
 		int tile = isComputerMove ? X_TILE : O_TILE;
 		if (this.getTileAtSpot(spot) != EMPTY) {
@@ -162,10 +166,11 @@ public class Othello extends GenericBoardGame {
 		}
 		return false;
 	}
-public int getSize(){
-	return 5;
-}
-	
+
+	public int getSize() {
+		return 5;
+	}
+
 	/**
 	 * Make a declared move based on it's description, and who's moving
 	 *
@@ -213,10 +218,12 @@ public int getSize(){
 		return o;
 
 	}
-/**
-	* Checks whether or not we should end the game pre-maturely
-	* @return 
-	*/
+
+	/**
+	 * Checks whether or not we should end the game pre-maturely
+	 *
+	 * @return
+	 */
 	@Override
 	public boolean isGameOver() {
 		return false;
