@@ -7,7 +7,7 @@ An AI which has been taught to play a variety of games of perfect information, i
 <li>Othello/Reversi Classic (8x8)</li>
 <li>Othello/Reversi 5x5</li>
 <li>Tic-Tac-Toe</li>
-<li>4x4 Tic-Tac-Toe variant where you need 3 of your kind and one of your opponents to win </li>
+<li>4x4 Tic-Tac-Toe variant where you need 3 of your kind and one of your opponents to win (in one line, but in any order) </li>
 </ul>
 
 ![alt tag](https://github.com/rjhunjhunwala/AI/blob/master/Screenshot.gif)
