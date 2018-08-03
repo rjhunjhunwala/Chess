@@ -57,10 +57,10 @@ public class Chess extends GenericBoardGame {
 	public static final int QUEEN = 5;
 	public static final int KING = 6;
 	/**
-	 * All right, this one deserves some justification... A "Ghost pawn, is the way
-	 * we'll handle en passant" For the turn after (and just the turn after) a pawn
-	 * moves up two, we leave a ghost pawn, in it's square That way, the board
-	 * knows that square is valid for an en-passant capture
+	 * All right, this one deserves some justification... A "Ghost pawn, is the
+	 * way we'll handle en passant" For the turn after (and just the turn after)
+	 * a pawn moves up two, we leave a ghost pawn, in it's square That way, the
+	 * board knows that square is valid for an en-passant capture
 	 */
 	public static final int GHOST_PAWN = 1 << 4;
 
@@ -99,14 +99,15 @@ public class Chess extends GenericBoardGame {
 		VALUES[KING] = KING_VALUE;
 	}
 
-	public static final int[] PAWN_VALUE_TABLE = {0, 30, 40, 50, 100, 130, 160};
+	public static final int[] PAWN_VALUE_TABLE = {0, 10, 25, 45, 70, 120, 140};
 
 	//======End of Constants======
 	/**
-	 * Ok, so we store the state of a single chessboard as an array of longs This
-	 * is for "performance" and "memory optimization" reasons (I think it helps but
-	 * I can't prove it.) Each long, represents one row. A long is 64 bits, so we
-	 * can use around 8 bits to store each piece which should be "plenty"
+	 * Ok, so we store the state of a single chessboard as an array of longs
+	 * This is for "performance" and "memory optimization" reasons (I think it
+	 * helps but I can't prove it.) Each long, represents one row. A long is 64
+	 * bits, so we can use around 8 bits to store each piece which should be
+	 * "plenty"
 	 */
 	public long[] state;
 
@@ -118,22 +119,22 @@ public class Chess extends GenericBoardGame {
 		state = new long[8];
 		for (int i = 0; i < 8; i++) {
 			Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
-	Chess.setTileAtSpot(state, 48 + i, PAWN);
+			Chess.setTileAtSpot(state, 48 + i, PAWN);
 		}
 		Chess.setTileAtSpot(state, 0, ROOK + (BLACK << 3) + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3)  + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 7, ROOK + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 1, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3) + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3) + (UNMOVED << 4));
-
+		
 		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
-	Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 61, BISHOP + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 59, QUEEN + (UNMOVED << 4));
@@ -200,9 +201,9 @@ public class Chess extends GenericBoardGame {
 	}
 
 	/**
-	 * A heuristic way of evaluating a board First, we take the difference of the
-	 * computers values and the opponents, next, we add bonuses/penalties for
-	 * center ownership and control
+	 * A heuristic way of evaluating a board First, we take the difference of
+	 * the computers values and the opponents, next, we add bonuses/penalties
+	 * for center ownership and control
 	 *
 	 * @return the value of a board
 	 */
@@ -224,14 +225,14 @@ public class Chess extends GenericBoardGame {
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpotSpecial(i);
 //System.out.println(piece);
-	// Branchless == fast, a very quick (in theory) this is the fun way of saying subtract one iff empty 
+			// Branchless == fast, a very quick (in theory) this is the fun way of saying subtract one iff empty 
 			pieceCount -= (((~(piece & 15)) & 15) / 15);
 //encourage owning material
 			value += (((((piece & 8) >> 2) - 1))) * (VALUES[piece & 7]);
 
 			if ((piece & 7) == KING || (piece & 7) == ROOK) {
 				//encourage not moving the king or rook... heavily
-				value += (((((piece & 8) >> 2) - 1)) * (piece & 16)) << 3;
+				value += (((((piece & 8) >> 2) - 1)) * (piece & 16)) << 2;
 			}
 
 			if (((i >> 3) > 0 && (piece & 8) == 8) && ((piece & 7) == BISHOP || (piece & 7) == KNIGHT)) {
@@ -245,66 +246,66 @@ public class Chess extends GenericBoardGame {
 
 //lightly encourage moving pawns up the board, and discourage enemy advancement
 			if ((piece & 7) == PAWN) {
-				if ((piece & 8) == (BLACK<<3)) {
+				if ((piece & 8) == (BLACK << 3)) {
 					value += PAWN_VALUE_TABLE[(i >> 3)];
 				} else {
-					value -= PAWN_VALUE_TABLE[7 - (i>>3)];
+					value -= PAWN_VALUE_TABLE[7 - (i >> 3)];
 				}
 			}
 		}
-if(pieceCount < 8){
-		List<Integer> compMoves = getPossibleMoves(true, false, true);
-		LinkedList<Integer> compChecks = new LinkedList<>();
-		for (Integer c : compMoves) {
-			compChecks.add((c >> 6) & 63);
-		}
-		List<Integer> humanMoves = getPossibleMoves(false, false, true);
-		LinkedList<Integer> humanChecks = new LinkedList<>();
-		for (Integer c : humanMoves) {
-			compChecks.add((c >> 6) & 63);
-		}
-		for (Integer c : compMoves) {
-			compChecks.add((c >> 6) & 63);
-		}
-		int start = 0;
-		int compKingStartX, compKingStartY;
-		for (int i = 0; i < 64; i++) {
-			if ((getTileAtSpot(i) & 15) == (KING + (BLACK << 3))) {
-				start = i;
-				break;
+		if (pieceCount < 8) {
+			List<Integer> compMoves = getPossibleMoves(true, false, true);
+			LinkedList<Integer> compChecks = new LinkedList<>();
+			for (Integer c : compMoves) {
+				compChecks.add((c >> 6) & 63);
 			}
-		}
-		compKingStartX = start%8;
-		compKingStartY = start & 0b111000;
-		int compBoxSize = getFloodFillSize(start, humanChecks);
-		int humanKingStartX,humanKingStartY;
-		for (int i = 0; i < 64; i++) {
-			if ((getTileAtSpot(i) & 15) == (KING)) {
-				start = i;
-				break;
+			List<Integer> humanMoves = getPossibleMoves(false, false, true);
+			LinkedList<Integer> humanChecks = new LinkedList<>();
+			for (Integer c : humanMoves) {
+				compChecks.add((c >> 6) & 63);
 			}
-		}
-				humanKingStartX = start%8;
-		humanKingStartY = start & 0b111000;
-value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingStartY-compKingStartY)));
-		int humanBoxSize = getFloodFillSize(start, compChecks);
-		 value -= (64 - compBoxSize)<<1;
-		value += (64 - humanBoxSize)<<1;
-}else{
-		//encourage owning a spot in the center
-		value += ((((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
-		value += ((((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
-		value += ((((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
-		value += ((((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
+			for (Integer c : compMoves) {
+				compChecks.add((c >> 6) & 63);
+			}
+			int start = 0;
+			int compKingStartX, compKingStartY;
+			for (int i = 0; i < 64; i++) {
+				if ((getTileAtSpot(i) & 15) == (KING + (BLACK << 3))) {
+					start = i;
+					break;
+				}
+			}
+			compKingStartX = start % 8;
+			compKingStartY = start & 0b111000;
+			int compBoxSize = getFloodFillSize(start, humanChecks);
+			int humanKingStartX, humanKingStartY;
+			for (int i = 0; i < 64; i++) {
+				if ((getTileAtSpot(i) & 15) == (KING)) {
+					start = i;
+					break;
+				}
+			}
+			humanKingStartX = start % 8;
+			humanKingStartY = start & 0b111000;
+			value += (4 - Math.max(Math.abs(humanKingStartX - compKingStartX), Math.abs(humanKingStartY - compKingStartY)));
+			int humanBoxSize = getFloodFillSize(start, compChecks);
+			value -= (64 - compBoxSize) << 1;
+			value += (64 - humanBoxSize) << 1;
+		} else {
+			//encourage owning a spot in the center
+			value += ((((getTileAtSpot(27) & 8) >> 2) - 1)) * (35);
+			value += ((((getTileAtSpot(28) & 8) >> 2) - 1)) * (35);
+			value += ((((getTileAtSpot(35) & 8) >> 2) - 1)) * (35);
+			value += ((((getTileAtSpot(36) & 8) >> 2) - 1)) * (35);
 
-		//incentivize castling
-		if (((getTileAtSpot(2) & 7) == KING) && ((getTileAtSpot(3) & 7) == ROOK)) {
-			value += 90;
+			//incentivize castling
+			if (((getTileAtSpot(2) & 7) == KING) && ((getTileAtSpot(3) & 7) == ROOK)) {
+				value += 90;
+			}
+			if ((getTileAtSpot(6) & 7) == KING && ((getTileAtSpot(5) & 7) == ROOK)) {
+				value += 135;
+			}
 		}
-		if ((getTileAtSpot(6) & 7) == KING && ((getTileAtSpot(5) & 7) == ROOK)) {
-			value += 135;
-		}
-}
 		return value;
 	}
 
@@ -351,49 +352,50 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 						ret++;
 					}
 				}
-					if (a + 8 < 64 && (a & 7) > 0) {
-						if (!checks.contains(a + 7)) {
-							checks.add(a + 7);
-							finalFrontier.add(a + 7);
-							ret++;
-						}
+				if (a + 8 < 64 && (a & 7) > 0) {
+					if (!checks.contains(a + 7)) {
+						checks.add(a + 7);
+						finalFrontier.add(a + 7);
+						ret++;
 					}
-						if (a + 8 < 64) {
-							if (!checks.contains(a + 8)) {
-								checks.add(a + 8);
-								finalFrontier.add(a + 8);
-								ret++;
-							}
-						}
-						if ((a & 7) > 0) {
-							if (!checks.contains(a - 1)) {
-								checks.add(a - 1);
-								finalFrontier.add(a - 1);
-								ret++;
-							}
-						}
-						if ((a & 7) < 7) {
-							if (!checks.contains(a + 1)) {
-								checks.add(a + 1);
-								finalFrontier.add(a + 1);
-								ret++;
-							}
-						}
-					}
-					frontier = finalFrontier;
 				}
+				if (a + 8 < 64) {
+					if (!checks.contains(a + 8)) {
+						checks.add(a + 8);
+						finalFrontier.add(a + 8);
+						ret++;
+					}
+				}
+				if ((a & 7) > 0) {
+					if (!checks.contains(a - 1)) {
+						checks.add(a - 1);
+						finalFrontier.add(a - 1);
+						ret++;
+					}
+				}
+				if ((a & 7) < 7) {
+					if (!checks.contains(a + 1)) {
+						checks.add(a + 1);
+						finalFrontier.add(a + 1);
+						ret++;
+					}
+				}
+			}
+			frontier = finalFrontier;
+		}
 		return ret;
 	}
+	public static boolean doCloserAnalysis = false;
 
 	@Override
 	public List<Integer> getPossibleMoves(boolean isComputerMove
 	) {
-		return getPossibleMoves(isComputerMove, true, false);
+		return getPossibleMoves(isComputerMove, true, !doCloserAnalysis);
 	}
 
 	/**
-	 * I need a second version of this method to avoid an infinite loop when both
-	 * sides can castle
+	 * I need a second version of this method to avoid an infinite loop when
+	 * both sides can castle
 	 *
 	 * @param isComputerMove
 	 * @param considerKing
@@ -435,7 +437,7 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 							//when checking for control of squares (for castling check), pretend pawns can diagonal move
 							//Also, allow pawns to capture en passant, yes I do know it's ugly
 							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing
-															|| (((specialTarget = getTileAtSpotSpecial(end - 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
+									|| (((specialTarget = getTileAtSpotSpecial(end - 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
 								toRet.add(((end - 1) << 6) + i);
 							}
 						}
@@ -443,7 +445,7 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 							int leftDiagonalCapture = getTileAtSpot(end + 1);
 							//same justification
 							if ((leftDiagonalCapture != 0 && (leftDiagonalCapture & 8) != (side)) || !considerKing
-															|| (((specialTarget = getTileAtSpotSpecial(end + 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
+									|| (((specialTarget = getTileAtSpotSpecial(end + 1)) & GHOST_PAWN) != 0 && ((side) != ((specialTarget & 32) >> 2)))) {
 								toRet.add(((end + 1) << 6) + i);
 							}
 						}
@@ -939,8 +941,8 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 	}
 
 	/**
-	 * The bottom 6 bits represent the initial spot, and the next 6 bits represent
-	 * the final spot
+	 * The bottom 6 bits represent the initial spot, and the next 6 bits
+	 * represent the final spot
 	 *
 	 * @param move
 	 * @param isComputerTurn
@@ -1037,11 +1039,11 @@ value+=(4-Math.max(Math.abs(humanKingStartX-compKingStartX), Math.abs(humanKingS
 		System.out.println("};");
 	}
 	/**
-	 * All right, here's where it gets questionable.... What's a good data-type to
-	 * store an image? Think about it for a bit? Have an answer? You're wrong. We
-	 * use an array of longs, to store a serialized image. each line represents one
-	 * line of the image, and each bit in the long represents whether or not that
-	 * pixel is active...
+	 * All right, here's where it gets questionable.... What's a good data-type
+	 * to store an image? Think about it for a bit? Have an answer? You're
+	 * wrong. We use an array of longs, to store a serialized image. each line
+	 * represents one line of the image, and each bit in the long represents
+	 * whether or not that pixel is active...
 	 */
 	public static final long[] KING_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 0l, 4194304l, 14680064l, 32505856l, 32505856l, 15064897536l, 68483612160l, 137404612352l, 274859556736l, 274860081024l, 549745328064l, 549749522368l, 274873712576l, 274873712512l, 137434759040l, 68715282176l, 34344009216l, 16172988416l, 1073725440l, 4294963200l, 4026593280l, 2684325888l, 2147475456l, 4279234560l, 3288084480l, 1073725440l, 2147475456l, 268369920l, 0l, 0l, 0l, 0l, 0l, 0l,};
 	public static final long[] QUEEN_SPRITE = new long[]{0l, 0l, 0l, 0l, 0l, 0l, 14680064l, 14704640l, 3235966976l, 3221250048l, 0l, 824633720928l, 824633720928l, 0l, 4194304l, 1077985280l, 1616953344l, 1625341952l, 70613319936l, 104973058816l, 122153060096l, 53567800832l, 62175563264l, 66537905664l, 64961486336l, 268304384l, 34359737344l, 34359737344l, 17179867136l, 0l, 4294959104l, 4294959104l, 4228374528l, 1073709056l, 8589930496l, 17179867136l, 17179867136l, 17179867136l, 1073709056l, 0l, 0l, 0l, 0l, 0l, 0l,};

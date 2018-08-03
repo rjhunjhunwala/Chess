@@ -24,6 +24,8 @@ import javax.swing.*;
  */
 public class ArtificialIntelligence {
 
+	public static boolean gameOver = false;
+
 	public static enum Difficulty {
 
 		baby,
@@ -35,7 +37,7 @@ public class ArtificialIntelligence {
 
 	public static Difficulty difficulty = Difficulty.medium;
 
-	public static final int[] CHESS_DIFFICULTY = new int[]{1, 2, 3, 4, 5};
+	public static final int[] CHESS_DIFFICULTY = new int[]{2, 3, 4, 5, 6};
 	public static final int[] TIC_TAC_TOE_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
 	public static final int[] OTHELLO_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
 	public static final int[] DALL_BALL_DIFFICULTY = new int[]{1, 2, 4, 8, 12};
@@ -118,6 +120,7 @@ public class ArtificialIntelligence {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
+			gameOver = false;
 			humanPlaysFirst = humanWillPlayFirst;
 			boards = new LinkedList<>();
 			setUpNewGame(game);
@@ -161,11 +164,31 @@ public class ArtificialIntelligence {
 		}
 	}
 
+	public static boolean gameOver(boolean isComputerTurn) {
+		Board mainBoard = getMainBoard();
+		boolean toReturn = false;
+		Chess.doCloserAnalysis = true;
+		if (mainBoard instanceof Chess) {
+
+			toReturn = mainBoard.getPossibleMoves(isComputerTurn).isEmpty();
+
+		} else {
+			//TODO: display some message...
+			toReturn = mainBoard.isGameOver();
+		}
+		if (toReturn) {
+			int val  = AlphaBetaNode.alphaBeta((new AlphaBetaNode(mainBoard)),0, Integer.MIN_VALUE,Integer.MAX_VALUE,isComputerTurn);
+			JOptionPane.showMessageDialog(ArtificialIntelligence.g, val == 0? "Draw" : val > 0? "Computer wins!" : "Human wins!", "Game Over!" ,JOptionPane.WARNING_MESSAGE);
+		}
+		Chess.doCloserAnalysis = false;
+		return toReturn;
+	}
+
 	/**
 	 * Let the ai make it's move
 	 */
 	public static void makeComputerMove() {
-		if (!getMainBoard().isGameOver() && !ArtificialIntelligence.getMainBoard().getPossibleMoves(true).isEmpty()) {
+		if (!(gameOver = gameOver(true))) {
 			ArtificialIntelligence.computerIsThinking.set(true);
 			try {
 				Board mainBoard = getMainBoard();
@@ -183,6 +206,10 @@ public class ArtificialIntelligence {
 				if (!getMainBoard().getPossibleMoves(true).isEmpty()) {
 					int bestMove = node.getBestMove();
 					setMainBoard(mainBoard.makeMove(bestMove, true));
+gameOver(false);
+				}else{
+
+			JOptionPane.showMessageDialog(ArtificialIntelligence.g, "Draw", "Game Over!" ,JOptionPane.WARNING_MESSAGE);	
 				}
 			} finally {
 				ArtificialIntelligence.computerIsThinking.set(false);
@@ -320,6 +347,7 @@ public class ArtificialIntelligence {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					if (boards.size() > 2) {
+						gameOver = false;
 						boards.removeLast();
 						boards.removeLast();
 						g.repaint();
@@ -337,7 +365,6 @@ public class ArtificialIntelligence {
 					Board mainBoard = getMainBoard();
 					if (mainBoard instanceof Othello || mainBoard instanceof BigOthello) {
 						if (mainBoard.getPossibleMoves(false).get(0).equals(BigOthello.NO_MOVE)) {
-							System.out.println("here");
 							makeComputerMove();
 						}
 					}
@@ -410,16 +437,16 @@ public class ArtificialIntelligence {
 
 				@Override
 				public void mousePressed(MouseEvent e) {
-					if (!ArtificialIntelligence.computerIsThinking.get()) {
+					if (!ArtificialIntelligence.computerIsThinking.get() && !gameOver && !(gameOver = gameOver(false))) {
 						int x = e.getX();
 						int y = e.getY();
 						x /= GamePanel.SCALE;
 						y /= GamePanel.SCALE;
 						mouseDownLoc = y * getSIZE() + x;
 						if (!(getMainBoard() instanceof Chess)) {
-							if(getMainBoard().getPossibleMoves(false).contains(mouseDownLoc)){
-							setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
-							}else{
+							if (getMainBoard().getPossibleMoves(false).contains(mouseDownLoc)) {
+								setMainBoard(getMainBoard().makeMove(mouseDownLoc, false));
+							} else {
 								mouseDownLoc = -1;
 							}
 						}

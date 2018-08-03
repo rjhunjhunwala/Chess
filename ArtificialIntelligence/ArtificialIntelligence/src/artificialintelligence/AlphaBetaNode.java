@@ -24,7 +24,7 @@ public class AlphaBetaNode {
 
 				for (int move : parent.board.getPossibleMoves(!maximizingPlayer)) {
 					if ((((Chess) parent.board).getTileAtSpotSpecial((move >> 6) & 63) & 7) == Chess.KING) {
-						return maximizingPlayer ? -Chess.KING_VALUE + (depth << 2): Chess.KING_VALUE - (depth <<2);
+						return maximizingPlayer ? -Chess.KING_VALUE + (depth << 2) : Chess.KING_VALUE - (depth << 2);
 					}
 				}
 
@@ -84,7 +84,7 @@ public class AlphaBetaNode {
 					break;
 				}
 			}
-			parent.bestMove = bestMove;
+			parent.bestMove = moves.get(bestMove);
 			return value;
 		}
 	}
@@ -97,7 +97,17 @@ public class AlphaBetaNode {
 	}
 
 	public int getBestMove() {
-		alphaBeta(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+		if (this.board instanceof Chess) {
+			int val = alphaBeta(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+			if (Math.abs(val) > Chess.KING_VALUE / 3) {
+				Chess.doCloserAnalysis = true;
+				alphaBeta(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+				Chess.doCloserAnalysis = false;
+			}
+		} else {
+			alphaBeta(this, 0, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+		}
+
 		return bestMove;
 	}
 
