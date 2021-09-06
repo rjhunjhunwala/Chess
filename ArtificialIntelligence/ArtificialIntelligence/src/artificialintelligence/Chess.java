@@ -5,7 +5,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+
+import java.util.Arrays;
 import java.util.List;
 import javax.imageio.ImageIO;
 
@@ -44,7 +45,7 @@ public class Chess extends GenericBoardGame {
 	/**
 	 * Base value of a pawn, later gets more points for being higher
 	 */
-	public static final int PAWN_VALUE = 60;
+	public static final int PAWN_VALUE = 70;
 
 	/**
 	 * These constants are the constants used to represent pieces
@@ -84,7 +85,6 @@ public class Chess extends GenericBoardGame {
 	public static final int UNMOVED = 1;
 	public static final int MOVED = 0;
 	/**
-	 *
 	 * This array stores all the values for O(1) access
 	 */
 	public static final int[] VALUES = new int[7];
@@ -98,6 +98,7 @@ public class Chess extends GenericBoardGame {
 		VALUES[QUEEN] = QUEEN_VALUE;
 		VALUES[KING] = KING_VALUE;
 	}
+
 
 	public static final int[] PAWN_VALUE_TABLE = {0, 10, 25, 45, 70, 120, 140};
 
@@ -115,7 +116,7 @@ public class Chess extends GenericBoardGame {
 	 * Creates a chess board with the standard legal starting position The AI is
 	 * black
 	 */
-	public Chess() {
+	public Chess(boolean aiIsBlack) {
 		state = new long[8];
 		for (int i = 0; i < 8; i++) {
 			Chess.setTileAtSpot(state, 8 + i, PAWN + (BLACK << 3));
@@ -127,17 +128,18 @@ public class Chess extends GenericBoardGame {
 		Chess.setTileAtSpot(state, 6, KNIGHT + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 2, BISHOP + (BLACK << 3) + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 5, BISHOP + (BLACK << 3) + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 4, KING + (BLACK << 3) + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 3, QUEEN + (BLACK << 3) + (UNMOVED << 4));
-		
+
+		Chess.setTileAtSpot(state, aiIsBlack ? 4 : 3, KING + (BLACK << 3) + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, aiIsBlack ? 3 : 4, QUEEN + (BLACK << 3) + (UNMOVED << 4));
+
 		Chess.setTileAtSpot(state, 56, ROOK + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 63, ROOK + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 57, KNIGHT + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 62, KNIGHT + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 58, BISHOP + (UNMOVED << 4));
 		Chess.setTileAtSpot(state, 61, BISHOP + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 60, KING + (UNMOVED << 4));
-		Chess.setTileAtSpot(state, 59, QUEEN + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, aiIsBlack ? 60 : 59, KING + (UNMOVED << 4));
+		Chess.setTileAtSpot(state, aiIsBlack ? 59 : 60, QUEEN + (UNMOVED << 4));
 
 	}
 
@@ -162,6 +164,7 @@ public class Chess extends GenericBoardGame {
 		}
 		return false;
 	}
+
 
 	/**
 	 * Create a board with an initial state
@@ -210,6 +213,7 @@ public class Chess extends GenericBoardGame {
 	@Override
 	public int getValue() {
 
+
 //		if(isInCheck(true)){
 //			if(getPossibleMoves(true).isEmpty()){
 //				return -2 * VALUES[KING];
@@ -237,11 +241,11 @@ public class Chess extends GenericBoardGame {
 
 			if (((i >> 3) > 0 && (piece & 8) == 8) && ((piece & 7) == BISHOP || (piece & 7) == KNIGHT)) {
 				//lightly encourage piece developement
-				value += 32;
+				value += 50;
 			}
 			if (((i >> 3) < 7 && (piece & 8) == 0) && ((piece & 7) == BISHOP || (piece & 7) == KNIGHT)) {
 				//lightly discourage hostile developement
-				value -= 32;
+				value -= 50;
 			}
 
 //lightly encourage moving pawns up the board, and discourage enemy advancement
@@ -253,14 +257,14 @@ public class Chess extends GenericBoardGame {
 				}
 			}
 		}
-		if (pieceCount < 8) {
+		if (pieceCount < 5) {
 			List<Integer> compMoves = getPossibleMoves(true, false, true);
-			LinkedList<Integer> compChecks = new LinkedList<>();
+			List<Integer> compChecks = new ArrayList<>();
 			for (Integer c : compMoves) {
 				compChecks.add((c >> 6) & 63);
 			}
 			List<Integer> humanMoves = getPossibleMoves(false, false, true);
-			LinkedList<Integer> humanChecks = new LinkedList<>();
+			List<Integer> humanChecks = new ArrayList<>();
 			for (Integer c : humanMoves) {
 				compChecks.add((c >> 6) & 63);
 			}
@@ -318,10 +322,10 @@ public class Chess extends GenericBoardGame {
 	public static int getFloodFillSize(int start, List<Integer> checks) {
 		int ret = 0;
 		checks.add(start);
-		LinkedList<Integer> frontier = new LinkedList<>();
+		List<Integer> frontier = new ArrayList<>();
 		frontier.add(start);
 		while (!frontier.isEmpty()) {
-			LinkedList<Integer> finalFrontier = new LinkedList<>();
+			ArrayList<Integer> finalFrontier = new ArrayList<>();
 			for (Integer a : frontier) {
 
 				if (a - 8 > 0) {
@@ -385,12 +389,29 @@ public class Chess extends GenericBoardGame {
 		}
 		return ret;
 	}
+
 	public static boolean doCloserAnalysis = false;
 
 	@Override
 	public List<Integer> getPossibleMoves(boolean isComputerMove
 	) {
 		return getPossibleMoves(isComputerMove, true, !doCloserAnalysis);
+	}
+
+	@Override
+	public long hash() {
+		return Arrays.hashCode(this.state);
+	}
+
+	public int hashCode(){
+		return Arrays.hashCode(this.state);
+	}
+	@Override
+	public boolean equals(Object o){
+		Chess c = (Chess) o;
+		return c.state[0] == this.state[0] && c.state[1] == this.state[1] && c.state[2] == this.state[2]
+				&& c.state[3] == this.state[3] && c.state[4] == this.state[4] && c.state[5] == this.state[5] && c.state[6] == this.state[6]
+				&& c.state[7] == this.state[7];
 	}
 
 	/**
@@ -403,7 +424,7 @@ public class Chess extends GenericBoardGame {
 	 * @return
 	 */
 	public List<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing, boolean shouldIgnoreChecks) {
-		LinkedList<Integer> toRet = new LinkedList<>();
+		ArrayList<Integer> toRet = new ArrayList<>();
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
 			int side;
@@ -1021,22 +1042,29 @@ public class Chess extends GenericBoardGame {
 	//These images have been used from the public domain
 	//https://creativecommons.org/licenses/by-sa/3.0/
 	public static final int SOURCE_SIZE = 45;
-
+	public static final int OUTPUT_SIZE = 32;
+	public static String[] array(String... array){
+		return  array;
+	}
 	public static void main(String[] args) throws IOException {
-		BufferedImage b = ImageIO.read(new File("WHITE_PAWN.png"));
-		System.out.print("public static final long[] PAWN_SPRITE = new long[]{");
-		for (int i = 0; i < SOURCE_SIZE; i++) {
-			long output = 0;
-			for (int j = 0; j < SOURCE_SIZE; j++) {
+		for (String name : array("WHITE_PAWN.png", "WHITE_BISHOP.png", "WHITE_KING.png", "WHITE_KNIGHT.png", "WHITE_QUEEN.png", "WHITE_ROOK.png"))
+		{
 
-				Color thisColor = new Color(b.getRGB(j, i));
-				if (thisColor.getGreen() + thisColor.getRed() + thisColor.getGreen() > 100) {
-					output += ((long) 1) << j;
+			BufferedImage b = ImageIO.read(new File("C:\\Users\\Rohan Jhunjhunwala\\Documents\\Chess\\ArtificialIntelligence\\ArtificialIntelligence\\" + name));
+			System.out.print(name + " = [");
+			for (int i = 0; i < OUTPUT_SIZE; i++) {
+				long output = 0;
+				for (int j = 0; j < OUTPUT_SIZE; j++) {
+
+					Color thisColor = new Color(b.getRGB((int) (j * ((SOURCE_SIZE * .9) / OUTPUT_SIZE) + 5), (int) (i * ((SOURCE_SIZE * .9) / OUTPUT_SIZE) + 5)));
+					if (thisColor.getGreen() + thisColor.getRed() + thisColor.getGreen() > 100) {
+						output += ((long) 1) << j;
+					}
 				}
+				System.out.print(output + ",");
 			}
-			System.out.print(output + "l,");
+			System.out.println("];");
 		}
-		System.out.println("};");
 	}
 	/**
 	 * All right, here's where it gets questionable.... What's a good data-type
@@ -1054,5 +1082,7 @@ public class Chess extends GenericBoardGame {
 	public static final long[] EMPTY_SPRITE = new long[SOURCE_SIZE];
 
 	public static long[][] SPRITES = new long[][]{EMPTY_SPRITE, PAWN_SPRITE, KNIGHT_SPRITE, BISHOP_SPRITE, ROOK_SPRITE, QUEEN_SPRITE, KING_SPRITE};
+
+//return new double[][][] {{{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {-58, -132, -341, -249, -428, -231, -122, -63, -65, -168, -300, -366, -218, -334, -143, -59, -52, -159, -222, -256, -186, -283, -156, -101, -84, -116, -223, -162, -250, -187, -100, -89, -67, -117, -137, -210, -297, -185, -105, -76, -114, -136, -173, -217, -145, -159, -115, -90, -134, -134, -122, -158, -158, -201, -155, -102, -116, -182, -117, -99, -114, -109, -109, -111}, {-113, -144, -184, -211, -174, -142, -116, -73, -127, -145, -192, -208, -219, -206, -143, -97, -119, -150, -166, -267, -215, -199, -187, -120, -112, -145, -213, -189, -263, -226, -224, -163, -170, -219, -194, -294, -285, -253, -182, -192, -106, -167, -221, -255, -262, -158, -118, -167, -119, -150, -224, -182, -266, -182, -147, -96, -98, -151, -137, -167, -240, -155, -121, -96}, {-204, -212, -233, -242, -337, -220, -131, -164, -202, -277, -249, -239, -188, -192, -241, -183, -208, -236, -194, -246, -265, -197, -207, -222, -258, -240, -259, -354, -290, -227, -338, -224, -185, -233, -226, -319, -365, -281, -186, -191, -228, -201, -204, -221, -271, -199, -255, -166, -206, -254, -229, -219, -192, -262, -191, -200, -198, -219, -240, -224, -202, -244, -218, -192}, {-495, -352, -470, -361, -405, -375, -413, -374, -518, -489, -347, -357, -556, -488, -434, -285, -392, -305, -441, -517, -418, -501, -502, -334, -397, -367, -397, -580, -444, -446, -468, -380, -513, -464, -445, -558, -539, -541, -413, -296, -467, -408, -364, -434, -495, -508, -427, -476, -378, -343, -419, -495, -363, -519, -413, -454, -349, -332, -416, -518, -362, -411, -385, -354}, {-820, -924, -765, -804, -1133, -778, -906, -662, -605, -551, -704, -1062, -848, -952, -826, -878, -880, -854, -878, -759, -836, -761, -880, -841, -729, -884, -1102, -928, -701, -807, -883, -910, -965, -716, -808, -919, -702, -912, -879, -801, -953, -963, -735, -752, -763, -982, -835, -755, -751, -589, -898, -808, -782, -1019, -726, -730, -657, -714, -738, -711, -911, -744, -809, -747}, {-1000315, -1000255, -1000195, -1000135, -1000135, -1000195, -1000255, -1000315, -1000285, -1000225, -1000165, -1000105, -1000105, -1000165, -1000225, -1000285, -1000255, -1000195, -1000135, -1000075, -1000075, -1000135, -1000195, -1000255, -1000225, -1000165, -1000105, -1000045, -1000045, -1000105, -1000165, -1000225, -1000225, -1000165, -1000105, -1000045, -1000045, -1000105, -1000165, -1000225, -1000255, -1000195, -1000135, -1000075, -1000075, -1000135, -1000195, -1000255, -1000285, -1000225, -1000165, -1000105, -1000105, -1000165, -1000225, -1000285, -1000315, -1000255, -1000195, -1000135, -1000135, -1000195, -1000255, -1000315}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}, {{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}, {109, 128, 143, 128, 138, 115, 134, 113, 110, 145, 128, 142, 129, 159, 136, 116, 87, 128, 164, 171, 214, 185, 116, 112, 105, 133, 177, 253, 156, 203, 110, 79, 110, 143, 180, 241, 240, 282, 167, 115, 98, 137, 269, 205, 238, 278, 119, 78, 70, 174, 282, 290, 304, 285, 157, 92, 55, 158, 359, 383, 295, 247, 154, 93}, {84, 133, 149, 222, 237, 172, 136, 84, 116, 156, 246, 231, 243, 184, 106, 117, 121, 171, 242, 285, 215, 247, 144, 129, 135, 199, 228, 237, 268, 208, 190, 165, 150, 206, 239, 218, 213, 234, 171, 120, 134, 134, 251, 284, 289, 222, 150, 99, 112, 153, 204, 189, 220, 188, 165, 110, 73, 107, 153, 201, 280, 158, 119, 73}, {179, 231, 246, 225, 249, 208, 224, 179, 198, 175, 244, 229, 223, 287, 208, 199, 217, 312, 223, 313, 229, 314, 235, 240, 240, 185, 298, 260, 263, 245, 272, 174, 216, 195, 275, 283, 324, 261, 235, 235, 184, 235, 235, 291, 224, 229, 201, 198, 172, 212, 190, 266, 300, 278, 267, 178, 164, 188, 228, 299, 232, 217, 198, 180}, {275, 365, 370, 417, 479, 482, 307, 463, 323, 446, 400, 501, 479, 450, 540, 308, 324, 455, 413, 387, 481, 405, 505, 434, 443, 406, 434, 552, 597, 485, 434, 363, 443, 448, 457, 456, 510, 552, 419, 419, 461, 483, 501, 492, 554, 351, 454, 501, 389, 399, 573, 469, 380, 300, 395, 426, 220, 480, 294, 428, 427, 352, 440, 414}, {875, 807, 741, 831, 697, 788, 517, 870, 752, 634, 764, 774, 856, 624, 1109, 921, 835, 922, 657, 977, 884, 971, 939, 715, 853, 895, 1075, 690, 845, 867, 727, 715, 972, 849, 945, 740, 944, 973, 711, 986, 768, 898, 825, 898, 615, 1168, 934, 658, 796, 861, 1016, 1116, 831, 971, 862, 810, 741, 866, 979, 712, 850, 1010, 865, 634}, {1000315, 1000255, 1000195, 1000135, 1000135, 1000195, 1000255, 1000315, 1000285, 1000225, 1000165, 1000105, 1000105, 1000165, 1000225, 1000285, 1000255, 1000195, 1000135, 1000075, 1000075, 1000135, 1000195, 1000255, 1000225, 1000165, 1000105, 1000045, 1000045, 1000105, 1000165, 1000225, 1000225, 1000165, 1000105, 1000045, 1000045, 1000105, 1000165, 1000225, 1000255, 1000195, 1000135, 1000075, 1000075, 1000135, 1000195, 1000255, 1000285, 1000225, 1000165, 1000105, 1000105, 1000165, 1000225, 1000285, 1000315, 1000255, 1000195, 1000135, 1000135, 1000195, 1000255, 1000315}, {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}
 
 }

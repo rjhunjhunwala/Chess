@@ -5,7 +5,7 @@ package artificialintelligence;
  *
  * @author rohan
  */
-public abstract class GenericBoardGame implements Board {
+public abstract class GenericBoardGame extends Board {
 	/**
 		* Gets the "tile" at a given spot in a generic board game
 		* @param spot

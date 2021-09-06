@@ -9,7 +9,8 @@ import java.util.List;
  *
  * @author rohan
  */
-public interface Board {
+public abstract class Board {
+	public static final long BIG_PRIME = 2L << 61 - 1;
 
 	/**
 	 * Returns whether or not the game is over
@@ -31,16 +32,22 @@ public interface Board {
 	 * Gets the possible moves (sorry, couldn't turn down that chance)
 	 *
 	 * @param isComputerMove A boolean determining whether or not we are looking at
-	 * moves for the human or computer
+	 *                       moves for the human or computer
 	 */
 	public abstract List<Integer> getPossibleMoves(boolean isComputerMove);
 
 	/**
 	 * Make a move and return, the board resulting from the new state
 	 *
-	 * @param spot the move to make
+	 * @param spot           the move to make
 	 * @param isComputerTurn whether or not the move is being made by the computer
 	 * @return The new board after the move has been made
 	 */
 	public abstract Board makeMove(int spot, boolean isComputerTurn);
+
+	public abstract long hash();
+
+	public int hashCode(){
+		return (int) this.hash();
+	}
 }

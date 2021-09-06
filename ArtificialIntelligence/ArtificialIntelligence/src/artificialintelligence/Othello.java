@@ -49,6 +49,15 @@ public class Othello extends GenericBoardGame {
 	 */
 	private long state = 0;
 
+	public long hash(){
+		return state;
+	}
+
+	public boolean equals(Object o){
+		return ((Othello) o).state == this.state;
+	}
+
+
 	public Othello(long inState) {
 		state = inState;
 	}

@@ -69,6 +69,38 @@ public class BigOthello extends GenericBoardGame {
 	 */
 	private int[] state = new int[8];
 
+	@Override
+	public long hash() {
+		long out = 0;
+		out += state[0];
+		out *= BIG_PRIME;
+		out += state[1];
+		out *= BIG_PRIME;
+		out += state[2];
+		out *= BIG_PRIME;
+		out += state[3];
+		out *= BIG_PRIME;
+		out += state[4];
+		out *= BIG_PRIME;
+		out += state[5];
+		out *= BIG_PRIME;
+		out += state[6];
+		out *= BIG_PRIME;
+		out += state[7];
+		out *= BIG_PRIME;
+
+		return out;
+	}
+
+	@Override
+	public boolean equals(Object o){
+		BigOthello c = (BigOthello) o;
+		return c.state[0] == this.state[0] && c.state[1] == this.state[1] && c.state[2] == this.state[2]
+				&& c.state[3] == this.state[3] && c.state[4] == this.state[4] && c.state[5] == this.state[5] && c.state[6] == this.state[6]
+				&& c.state[7] == this.state[7];
+	}
+
+
 	/**
 	 * Make an Othello board with the original starting configuration
 	 */

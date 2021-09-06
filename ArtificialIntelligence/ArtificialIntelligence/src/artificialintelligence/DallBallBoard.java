@@ -50,6 +50,17 @@ public class DallBallBoard extends GenericBoardGame {
 		playTicTacToe();
 	}
 
+	@Override
+	public long hash() {
+		return this.state;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		DallBallBoard c = (DallBallBoard) o;
+		return c.state == this.state;
+	}
+
 	/**
 	 * As expected, plays tic tac toe
 	 */

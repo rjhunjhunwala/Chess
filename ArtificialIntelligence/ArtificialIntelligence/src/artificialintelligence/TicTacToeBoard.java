@@ -60,6 +60,14 @@ public class TicTacToeBoard extends GenericBoardGame {
 		}
 	}
 
+	public long hash(){
+		return this.state;
+	}
+
+	public boolean equals(Object o){
+		return this.state == ((TicTacToeBoard) o).state;
+	}
+
 	/**
 	 * Returns a manipulated version of "state" so that the given spot now has a
 	 * given tile value

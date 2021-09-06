@@ -40,7 +40,7 @@ public class ArtificialIntelligence {
 	public static final int[] CHESS_DIFFICULTY = new int[]{2, 3, 4, 5, 6};
 	public static final int[] TIC_TAC_TOE_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
 	public static final int[] OTHELLO_DIFFICULTY = new int[]{1, 3, 5, 7, 9};
-	public static final int[] DALL_BALL_DIFFICULTY = new int[]{1, 2, 4, 8, 12};
+	public static final int[] DALL_BALL_DIFFICULTY = new int[]{1, 2, 4, 8, 16};
 
 	public static final AtomicBoolean computerIsThinking = new AtomicBoolean(false);
 
@@ -61,7 +61,7 @@ public class ArtificialIntelligence {
 	private static LinkedList<Board> boards = new LinkedList<>();
 
 	static {
-		setMainBoard(new Chess());
+		setMainBoard(new Chess(true));
 	}
 
 	public static boolean unMoved = true;
@@ -159,7 +159,7 @@ public class ArtificialIntelligence {
 				setSIZE(8);
 				break;
 			case 4:
-				setMainBoard(new Chess());
+				setMainBoard(new Chess(humanWillPlayFirst));
 				setSIZE(8);
 		}
 	}
@@ -202,9 +202,10 @@ public class ArtificialIntelligence {
 					DEPTH = ArtificialIntelligence.DALL_BALL_DIFFICULTY[difficulty.ordinal()];
 				}
 
-				AlphaBetaNode node = new AlphaBetaNode(mainBoard);
+
+				AlphaBetaNode node = new AlphaBetaNode(mainBoard); // new AlphaBetaNode((mainBoard instanceof Chess)? new GeneticChess(((Chess) mainBoard).state): mainBoard);
 				if (!getMainBoard().getPossibleMoves(true).isEmpty()) {
-					int bestMove = node.getBestMove();
+					int bestMove = (mainBoard instanceof Chess) && false? node.getBestMoveChess(true, new ChessPlayer()) :node.getBestMove();
 					setMainBoard(mainBoard.makeMove(bestMove, true));
 gameOver(false);
 				}else{
