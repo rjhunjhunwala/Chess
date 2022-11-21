@@ -34,7 +34,7 @@ public abstract class Board {
 	 * @param isComputerMove A boolean determining whether or not we are looking at
 	 *                       moves for the human or computer
 	 */
-	public abstract List<Integer> getPossibleMoves(boolean isComputerMove);
+	public abstract ArrayList<Integer> getPossibleMoves(boolean isComputerMove);
 
 	/**
 	 * Make a move and return, the board resulting from the new state

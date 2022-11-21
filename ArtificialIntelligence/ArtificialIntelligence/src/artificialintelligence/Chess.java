@@ -28,24 +28,24 @@ public class Chess extends GenericBoardGame {
 	/**
 	 * The queen's value in centi-pawns
 	 */
-	public static final int QUEEN_VALUE = 1280;
+	public static final int QUEEN_VALUE = 900;
 	/**
 	 * The value of a rook
 	 */
-	public static final int ROOK_VALUE = 680;
+	public static final int ROOK_VALUE = 500;
 	/**
 	 * The Bishop's value, let us consider a bishop to be slightly better than a
 	 * knight
 	 */
-	public static final int BISHOP_VALUE = 440;
+	public static final int BISHOP_VALUE = 310;
 	/**
 	 * The knight's value
 	 */
-	public static final int KNIGHT_VALUE = 420;
+	public static final int KNIGHT_VALUE = 300;
 	/**
 	 * Base value of a pawn, later gets more points for being higher
 	 */
-	public static final int PAWN_VALUE = 70;
+	public static final int PAWN_VALUE = 100;
 
 	/**
 	 * These constants are the constants used to represent pieces
@@ -224,6 +224,7 @@ public class Chess extends GenericBoardGame {
 //				return 2 * VALUES[KING];
 //			}
 //		}
+
 		int value = 0;
 		int pieceCount = 64;
 		for (int i = 0; i < 64; i++) {
@@ -304,10 +305,10 @@ public class Chess extends GenericBoardGame {
 
 			//incentivize castling
 			if (((getTileAtSpot(2) & 7) == KING) && ((getTileAtSpot(3) & 7) == ROOK)) {
-				value += 90;
+				value += 150;
 			}
 			if ((getTileAtSpot(6) & 7) == KING && ((getTileAtSpot(5) & 7) == ROOK)) {
-				value += 135;
+				value += 200;
 			}
 		}
 		return value;
@@ -393,7 +394,7 @@ public class Chess extends GenericBoardGame {
 	public static boolean doCloserAnalysis = false;
 
 	@Override
-	public List<Integer> getPossibleMoves(boolean isComputerMove
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove
 	) {
 		return getPossibleMoves(isComputerMove, true, !doCloserAnalysis);
 	}
@@ -423,7 +424,7 @@ public class Chess extends GenericBoardGame {
 	 * @param shouldIgnoreChecks
 	 * @return
 	 */
-	public List<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing, boolean shouldIgnoreChecks) {
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove, boolean considerKing, boolean shouldIgnoreChecks) {
 		ArrayList<Integer> toRet = new ArrayList<>();
 		for (int i = 0; i < 64; i++) {
 			int piece = getTileAtSpot(i);
@@ -971,13 +972,18 @@ public class Chess extends GenericBoardGame {
 	 */
 	@Override
 	public Board makeMove(int move, boolean isComputerTurn) {
+		var newState = getNewState(move, isComputerTurn);
+		return new Chess(newState);
+	}
+
+	public long[] getNewState(int move, boolean isComputerTurn) {
 		int tile = getTileAtSpot(move & 63);
 		int start = move & 63;
 		int end = (move >> 6) & 63;
 		boolean cleanUpGhosts = true;
 		//"performance"
 		long[] newState = {state[0], state[1], state[2], state[3],
-			state[4], state[5], state[6], state[7]};
+				state[4], state[5], state[6], state[7]};
 		if ((move & (1 << 12)) > 0) {
 
 			switch (end) {
@@ -1018,7 +1024,7 @@ public class Chess extends GenericBoardGame {
 				int specialTile;
 				if (((specialTile = getTileAtSpotSpecial(end)) & 31) == 16) {
 					int d = ((specialTile & 32) >> 4) - 1;
-//System.out.println(specialTile); 
+//System.out.println(specialTile);
 					Chess.setTileAtSpot(newState, end + (d << 3), 0);
 				}
 
@@ -1035,10 +1041,10 @@ public class Chess extends GenericBoardGame {
 				}
 			}
 		}
-		return new Chess(newState);
+		return newState;
 	}
 
-//Chess Graphics stuff
+	//Chess Graphics stuff
 	//These images have been used from the public domain
 	//https://creativecommons.org/licenses/by-sa/3.0/
 	public static final int SOURCE_SIZE = 45;

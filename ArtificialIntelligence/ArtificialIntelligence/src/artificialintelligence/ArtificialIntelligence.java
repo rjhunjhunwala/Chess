@@ -61,7 +61,7 @@ public class ArtificialIntelligence {
 	private static LinkedList<Board> boards = new LinkedList<>();
 
 	static {
-		setMainBoard(new Chess(true));
+		setMainBoard(new MemoizedChess(true));
 	}
 
 	public static boolean unMoved = true;
@@ -177,7 +177,7 @@ public class ArtificialIntelligence {
 			toReturn = mainBoard.isGameOver();
 		}
 		if (toReturn) {
-			int val  = AlphaBetaNode.alphaBeta((new AlphaBetaNode(mainBoard)),0, Integer.MIN_VALUE,Integer.MAX_VALUE,isComputerTurn);
+			int val  = AlphaBetaNode.alphaBeta((new AlphaBetaNode(mainBoard)),2, Integer.MIN_VALUE,Integer.MAX_VALUE,isComputerTurn, 2, (new AlphaBetaNode(mainBoard)));
 			JOptionPane.showMessageDialog(ArtificialIntelligence.g, val == 0? "Draw" : val > 0? "Computer wins!" : "Human wins!", "Game Over!" ,JOptionPane.WARNING_MESSAGE);
 		}
 		Chess.doCloserAnalysis = false;
@@ -190,6 +190,7 @@ public class ArtificialIntelligence {
 	public static void makeComputerMove() {
 		if (!(gameOver = gameOver(true))) {
 			ArtificialIntelligence.computerIsThinking.set(true);
+			Chess.doCloserAnalysis = false;
 			try {
 				Board mainBoard = getMainBoard();
 				if (mainBoard instanceof Chess) {
@@ -205,7 +206,7 @@ public class ArtificialIntelligence {
 
 				AlphaBetaNode node = new AlphaBetaNode(mainBoard); // new AlphaBetaNode((mainBoard instanceof Chess)? new GeneticChess(((Chess) mainBoard).state): mainBoard);
 				if (!getMainBoard().getPossibleMoves(true).isEmpty()) {
-					int bestMove = (mainBoard instanceof Chess) && false? node.getBestMoveChess(true, new ChessPlayer()) :node.getBestMove();
+					int bestMove = node.getBestMove();
 					setMainBoard(mainBoard.makeMove(bestMove, true));
 gameOver(false);
 				}else{

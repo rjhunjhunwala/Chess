@@ -175,8 +175,8 @@ public class DallBallBoard extends GenericBoardGame {
 	}
 
 	@Override
-	public LinkedList<Integer> getPossibleMoves(boolean isComputerMove) {
-		LinkedList<Integer> moves = new LinkedList<>();
+	public ArrayList<Integer> getPossibleMoves(boolean isComputerMove) {
+		ArrayList<Integer> moves = new ArrayList<>();
 		for (int i = 0; i < 16; i++) {
 			if (getTileAtSpot(i) == EMPTY) {
 				moves.add(i);
